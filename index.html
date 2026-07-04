@@ -40,7 +40,7 @@
       <!-- 導入セクション -->
       <section class="intro-section">
         <h1>名前に宿る運命を、AIが紐解く。</h1>
-        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、運勢や性格、そして二人の相性を導き出します。</p>
+        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、運勢や性格、相性、そして新しい名付けを導き出します。</p>
       </section>
 
       <!-- 鑑定モード切り替えタブ -->
@@ -52,6 +52,10 @@
         <button id="tab-mode-compat" class="mode-tab-button">
           <i data-lucide="heart"></i>
           <span>相性鑑定</span>
+        </button>
+        <button id="tab-mode-naming" class="mode-tab-button">
+          <i data-lucide="baby"></i>
+          <span>命名鑑定</span>
         </button>
       </div>
 
@@ -131,6 +135,38 @@
             </div>
           </div>
 
+          <!-- 命名鑑定用入力エリア (初期非表示) -->
+          <div id="form-naming-fields" class="hidden">
+            <h3 class="form-section-title"><i data-lucide="baby" class="title-icon icon-gold"></i> 命名の条件</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="naming-last-name">姓（名字）</label>
+                <input type="text" id="naming-last-name" placeholder="例：極楽">
+              </div>
+              <div class="form-group">
+                <label for="naming-last-name-kana">せい（ひらがな）</label>
+                <input type="text" id="naming-last-name-kana" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+              </div>
+              <div class="form-group">
+                <label for="naming-first-name-kana">希望する呼び名（よみがな・任意）</label>
+                <input type="text" id="naming-first-name-kana" placeholder="例：ひなた（空欄ならAIが響きから提案）" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+              </div>
+              <div class="form-group">
+                <label for="naming-gender">子供の性別</label>
+                <select id="naming-gender">
+                  <option value="">指定しない</option>
+                  <option value="boy">男の子</option>
+                  <option value="girl">女の子</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+              <label for="naming-wish">子供に込めたい願いやイメージ（任意）</label>
+              <textarea id="naming-wish" rows="3" placeholder="例：優しく思いやりのある子、グローバルに活躍できる子、自然のようにのびのび育ってほしい、など" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-main); padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1rem; transition: var(--transition-smooth); outline: none; resize: vertical; font-family: var(--font-sans);"></textarea>
+            </div>
+          </div>
+
           <!-- 共通オプション -->
           <div class="additional-options">
             <button type="button" id="btn-toggle-options" class="text-button">
@@ -161,6 +197,19 @@
                     <option value="general">一般（友人・知人）</option>
                     <option value="romance">恋愛・結婚</option>
                     <option value="business">仕事・ビジネス</option>
+                  </select>
+                </div>
+              </div>
+              <!-- 命名鑑定用追加オプション -->
+              <div class="form-grid hidden" id="naming-optional-grid">
+                <div class="form-group">
+                  <label for="naming-element">重視したい五行・要素（任意）</label>
+                  <select id="naming-element">
+                    <option value="">指定しない</option>
+                    <option value="wood">木（成長・健やかさ）</option>
+                    <option value="fire">火（情熱・活発さ）</option>
+                    <option value="earth">土 & 金（誠実・知性・強さ）</option>
+                    <option value="water">水（柔軟性・優しさ）</option>
                   </select>
                 </div>
               </div>
@@ -291,6 +340,41 @@
               <div class="tab-content" id="tab-compat-advice">
                 <div class="typing-text" id="ai-compat-advice-text"></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 命名鑑定結果表示 (初期非表示) -->
+        <div class="result-grid hidden" id="result-naming-grid">
+          <!-- 名字画数分析と吉数アドバイス -->
+          <div class="card glass result-card naming-advice-card">
+            <h3>名字の画数分析と吉数配置</h3>
+            <div class="naming-analysis-box">
+              <div class="analysis-row">
+                <span class="analysis-label">名字の天格:</span>
+                <span class="analysis-value" id="naming-ten-val">--画</span>
+              </div>
+              <div class="analysis-row" style="margin-top: 1rem;">
+                <span class="analysis-label">おすすめの名前の画数:</span>
+                <span class="analysis-value font-gold" id="naming-best-scores">--</span>
+              </div>
+              <div class="analysis-desc-text" id="naming-analysis-desc">
+                名字に調和し、総格が大吉・吉となる最適な画数のアドバイスがここに表示されます。
+              </div>
+            </div>
+          </div>
+
+          <!-- 漢字リコメンド候補リスト -->
+          <div class="card glass result-card naming-candidates-card">
+            <h3><i data-lucide="sparkles" class="icon-gold"></i> AI 漢字リコメンド候補</h3>
+            
+            <div class="naming-candidates-list" id="naming-candidates-container">
+              <!-- 漢字候補カードがJSで生成される -->
+            </div>
+
+            <div class="naming-blessing-box">
+              <h4>お祝いのアドバイス</h4>
+              <p id="naming-blessing-text"></p>
             </div>
           </div>
         </div>

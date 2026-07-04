@@ -53,6 +53,13 @@ body.theme-compat {
   --glow-color-3: rgba(255, 182, 193, 0.15);
 }
 
+body.theme-naming {
+  --accent-gold: #ffb5c5; /* サクラゴールド */
+  --glow-color-1: rgba(255, 181, 197, 0.25);
+  --glow-color-2: rgba(223, 186, 92, 0.2);
+  --glow-color-3: rgba(134, 68, 255, 0.15);
+}
+
 /* 全体のリセット */
 * {
   box-sizing: border-box;
@@ -218,7 +225,8 @@ body {
 .mode-tabs {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
   margin-bottom: 1.5rem;
 }
 
@@ -527,7 +535,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  .result-grid {
+  .result-grid, .naming-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -757,6 +765,189 @@ body {
   transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 命名鑑定結果表示のスタイル */
+.naming-analysis-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.analysis-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+
+.analysis-label {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.analysis-value {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.font-gold {
+  color: var(--accent-gold) !important;
+}
+
+.analysis-desc-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 0.5rem;
+}
+
+.naming-candidates-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 漢字候補カード（千社札・和風短冊風） */
+.naming-candidate-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(229, 193, 88, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.naming-candidate-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--accent-gold), var(--accent-sakura));
+}
+
+.naming-candidate-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(229, 193, 88, 0.1);
+}
+
+.candidate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.8rem;
+}
+
+.candidate-name-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.candidate-name {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: 2px;
+}
+
+.candidate-kana {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.candidate-score-summary {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.candidate-details {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 1.2rem;
+}
+
+@media (max-width: 550px) {
+  .candidate-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+.candidate-scores-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.mini-score-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.mini-score-label {
+  color: var(--text-muted);
+}
+
+.mini-score-val {
+  font-weight: 600;
+}
+
+.candidate-meaning-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.meaning-title {
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  font-weight: bold;
+}
+
+.meaning-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+.naming-blessing-box {
+  background: rgba(255, 181, 197, 0.05);
+  border: 1px dashed rgba(255, 181, 197, 0.2);
+  border-radius: 8px;
+  padding: 1.2rem;
+  margin-top: 2rem;
+}
+
+.naming-blessing-box h4 {
+  font-family: var(--font-serif);
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.naming-blessing-box p {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
 /* アクションボタン領域 */
 .result-actions {
   display: flex;
@@ -868,6 +1059,10 @@ body {
 .type-compat {
   background: rgba(255, 105, 180, 0.15);
   color: #ff69b4;
+}
+.type-naming {
+  background: rgba(229, 193, 88, 0.15);
+  color: #dfba5c;
 }
 
 .history-item-name {
