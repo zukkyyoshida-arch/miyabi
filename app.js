@@ -1541,3 +1541,9 @@ function getMockDataDaily(lastName, firstName) {
     action: actions[hash % actions.length]
   };
 }
+
+// テーマカラーのリセット
+function resetTheme() {
+  document.body.className = '';
+}
+
