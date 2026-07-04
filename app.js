@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
 
+// テーマカラーのリセット
+function resetTheme() {
+  document.body.className = '';
+}
+
 // アプリのグローバル状態
 let currentResult = null; // 現在表示中の鑑定結果を一時保存するオブジェクト
 let currentMode = 'single'; // 'single', 'compat', 'naming', 'daily'
@@ -1540,10 +1545,5 @@ function getMockDataDaily(lastName, firstName) {
     flow: flows[hash % flows.length],
     action: actions[hash % actions.length]
   };
-}
-
-// テーマカラーのリセット
-function resetTheme() {
-  document.body.className = '';
 }
 
