@@ -40,7 +40,7 @@
       <!-- 導入セクション -->
       <section class="intro-section">
         <h1>名前に宿る運命を、AIが紐解く。</h1>
-        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、運勢や性格、相性、そして新しい名付けを導き出します。</p>
+        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、運勢や性格、相性、命名、そして今日の歩み方を導き出します。</p>
       </section>
 
       <!-- 鑑定モード切り替えタブ -->
@@ -56,6 +56,10 @@
         <button id="tab-mode-naming" class="mode-tab-button">
           <i data-lucide="baby"></i>
           <span>命名鑑定</span>
+        </button>
+        <button id="tab-mode-daily" class="mode-tab-button">
+          <i data-lucide="calendar"></i>
+          <span>今日の運勢</span>
         </button>
       </div>
 
@@ -105,7 +109,7 @@
                   <input type="text" id="compat-last-name-kana-1" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
                 </div>
                 <div class="form-group">
-                  <label for="compat-first-name-kana-1">めい（ひらがな）</label>
+                  <label for="compat-first-name-kana-1">めい（ひらはな）</label>
                   <input type="text" id="compat-first-name-kana-1" placeholder="例：たろう" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
                 </div>
               </div>
@@ -167,6 +171,29 @@
             </div>
           </div>
 
+          <!-- 今日の運勢用入力エリア (初期非表示) -->
+          <div id="form-daily-fields" class="hidden">
+            <h3 class="form-section-title"><i data-lucide="calendar" class="title-icon icon-cyan"></i> お名前を入力</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="daily-last-name">姓（名字）</label>
+                <input type="text" id="daily-last-name" placeholder="例：極楽">
+              </div>
+              <div class="form-group">
+                <label for="daily-first-name">名（名前）</label>
+                <input type="text" id="daily-first-name" placeholder="例：太郎">
+              </div>
+              <div class="form-group">
+                <label for="daily-last-name-kana">せい（ひらがな）</label>
+                <input type="text" id="daily-last-name-kana" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+              </div>
+              <div class="form-group">
+                <label for="daily-first-name-kana">めい（ひらがな）</label>
+                <input type="text" id="daily-first-name-kana" placeholder="例：たろう" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+              </div>
+            </div>
+          </div>
+
           <!-- 共通オプション -->
           <div class="additional-options">
             <button type="button" id="btn-toggle-options" class="text-button">
@@ -200,7 +227,6 @@
                   </select>
                 </div>
               </div>
-              <!-- 命名鑑定用追加オプション -->
               <div class="form-grid hidden" id="naming-optional-grid">
                 <div class="form-group">
                   <label for="naming-element">重視したい五行・要素（任意）</label>
@@ -212,6 +238,9 @@
                     <option value="water">水（柔軟性・優しさ）</option>
                   </select>
                 </div>
+              </div>
+              <!-- 今日の運勢用の追加オプションはないが、レイアウト崩れを防ぐために空グリッド -->
+              <div class="form-grid hidden" id="daily-optional-grid">
               </div>
             </div>
           </div>
@@ -243,29 +272,50 @@
 
         <!-- 個人鑑定結果表示 -->
         <div class="result-grid" id="result-single-grid">
-          <!-- 画数・五格情報 -->
+          <!-- 画数・五格情報 ＆ チャート -->
           <div class="card glass result-card fate-scores-card">
             <h3>五格・五行解析</h3>
-            <div class="fate-scores">
-              <div class="score-item">
-                <div class="score-title">天格 <span class="score-desc">（祖先運）</span></div>
-                <div class="score-val" id="score-ten">-- <span class="fortune-badge">--</span></div>
+            <div class="score-chart-container">
+              <!-- 数値スコア -->
+              <div class="fate-scores">
+                <div class="score-item">
+                  <div class="score-title">天格 <span class="score-desc">（祖先運）</span></div>
+                  <div class="score-val" id="score-ten">-- <span class="fortune-badge">--</span></div>
+                </div>
+                <div class="score-item">
+                  <div class="score-title">人格 <span class="score-desc">（主運・性格）</span></div>
+                  <div class="score-val" id="score-jin">-- <span class="fortune-badge">--</span></div>
+                </div>
+                <div class="score-item">
+                  <div class="score-title">地格 <span class="score-desc">（初運・若年期）</span></div>
+                  <div class="score-val" id="score-chi">-- <span class="fortune-badge">--</span></div>
+                </div>
+                <div class="score-item">
+                  <div class="score-title">外格 <span class="score-desc">（助運・対人関係）</span></div>
+                  <div class="score-val" id="score-gai">-- <span class="fortune-badge">--</span></div>
+                </div>
+                <div class="score-item">
+                  <div class="score-title">総格 <span class="score-desc">（総運・晩年期）</span></div>
+                  <div class="score-val font-large" id="score-so">-- <span class="fortune-badge score-so-badge">--</span></div>
+                </div>
               </div>
-              <div class="score-item">
-                <div class="score-title">人格 <span class="score-desc">（主運・性格）</span></div>
-                <div class="score-val" id="score-jin">-- <span class="fortune-badge">--</span></div>
+
+              <!-- レーダーチャート用キャンバス -->
+              <div class="chart-box">
+                <canvas id="radar-chart" width="220" height="220"></canvas>
               </div>
-              <div class="score-item">
-                <div class="score-title">地格 <span class="score-desc">（初運・若年期）</span></div>
-                <div class="score-val" id="score-chi">-- <span class="fortune-badge">--</span></div>
+            </div>
+            
+            <!-- ラッキーカラー＆アイテム表示 -->
+            <div class="lucky-elements-box" id="single-lucky-box">
+              <div class="lucky-item color-item">
+                <span class="lucky-label"><i data-lucide="palette"></i> 開運色:</span>
+                <span class="lucky-value" id="single-lucky-color-text">--</span>
+                <span class="color-preview" id="single-lucky-color-preview"></span>
               </div>
-              <div class="score-item">
-                <div class="score-title">外格 <span class="score-desc">（助運・対人関係）</span></div>
-                <div class="score-val" id="score-gai">-- <span class="fortune-badge">--</span></div>
-              </div>
-              <div class="score-item">
-                <div class="score-title">総格 <span class="score-desc">（総運・晩年期）</span></div>
-                <div class="score-val font-large" id="score-so">-- <span class="fortune-badge score-so-badge">--</span></div>
+              <div class="lucky-item">
+                <span class="lucky-label"><i data-lucide="package"></i> 開運品:</span>
+                <span class="lucky-value" id="single-lucky-item-text">--</span>
               </div>
             </div>
           </div>
@@ -379,8 +429,58 @@
           </div>
         </div>
 
+        <!-- 今日の運勢結果表示 (初期非表示) -->
+        <div class="result-grid hidden" id="result-daily-grid">
+          <!-- 今日の運勢サマリー -->
+          <div class="card glass result-card daily-summary-card">
+            <h3>本日の数霊運</h3>
+            <div class="daily-score-box">
+              <div class="daily-rating" id="daily-stars-box">
+                <!-- 星マーク (★) がJSで動的追加される -->
+              </div>
+              <div class="daily-score-label">今日の総合波長</div>
+            </div>
+            
+            <!-- 今日のラッキーカラー＆アイテム -->
+            <div class="lucky-elements-box" id="daily-lucky-box">
+              <div class="lucky-item color-item">
+                <span class="lucky-label"><i data-lucide="palette"></i> ラッキーカラー:</span>
+                <span class="lucky-value" id="daily-lucky-color-text">--</span>
+                <span class="color-preview" id="daily-lucky-color-preview"></span>
+              </div>
+              <div class="lucky-item">
+                <span class="lucky-label"><i data-lucide="package"></i> ラッキーアイテム:</span>
+                <span class="lucky-value" id="daily-lucky-item-text">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI本日の詳細鑑定 -->
+          <div class="card glass result-card ai-reading-card">
+            <h3><i data-lucide="calendar" class="icon-gold"></i> AI 今日の一言天命</h3>
+            
+            <div class="ai-tab-container">
+              <div class="ai-tabs">
+                <button class="tab-button active" data-tab="tab-daily-flow">今日の運気と波長</button>
+                <button class="tab-button" data-tab="tab-daily-action">おすすめのアクション</button>
+              </div>
+              
+              <div class="tab-content active" id="tab-daily-flow">
+                <div class="typing-text" id="ai-daily-flow-text"></div>
+              </div>
+              <div class="tab-content" id="tab-daily-action">
+                <div class="typing-text" id="ai-daily-action-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="result-actions">
-          <button id="btn-save-history" class="secondary-button accent-gold-border">
+          <button id="btn-download-amulet" class="secondary-button accent-gold-border" title="結果のお守り画像をダウンロードします">
+            <i data-lucide="download"></i>
+            <span>お守りを授かる</span>
+          </button>
+          <button id="btn-save-history" class="secondary-button">
             <i data-lucide="bookmark"></i>
             <span>鑑定帳に保存</span>
           </button>

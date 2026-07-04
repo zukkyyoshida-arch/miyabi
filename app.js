@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // アプリのグローバル状態
 let currentResult = null; // 現在表示中の鑑定結果を一時保存するオブジェクト
-let currentMode = 'single'; // 'single' または 'compat' または 'naming'
+let currentMode = 'single'; // 'single', 'compat', 'naming', 'daily'
 let historyData = [];
 
 // アプリの初期化と状態管理
@@ -26,14 +26,17 @@ function initApp() {
   const tabModeSingle = document.getElementById('tab-mode-single');
   const tabModeCompat = document.getElementById('tab-mode-compat');
   const tabModeNaming = document.getElementById('tab-mode-naming');
+  const tabModeDaily = document.getElementById('tab-mode-daily');
 
   const formSingleFields = document.getElementById('form-single-fields');
   const formCompatFields = document.getElementById('form-compat-fields');
   const formNamingFields = document.getElementById('form-naming-fields');
+  const formDailyFields = document.getElementById('form-daily-fields');
 
   const singleOptionalGrid = document.getElementById('single-optional-grid');
   const compatOptionalGrid = document.getElementById('compat-optional-grid');
   const namingOptionalGrid = document.getElementById('naming-optional-grid');
+  const dailyOptionalGrid = document.getElementById('daily-optional-grid');
 
   const btnToggleOptions = document.getElementById('btn-toggle-options');
   const optionalFields = document.getElementById('optional-fields');
@@ -46,11 +49,13 @@ function initApp() {
   const btnReset = document.getElementById('btn-reset');
   const btnSaveHistory = document.getElementById('btn-save-history');
   const btnShareResult = document.getElementById('btn-share-result');
+  const btnDownloadAmulet = document.getElementById('btn-download-amulet');
 
   // 結果グリッド
   const resultSingleGrid = document.getElementById('result-single-grid');
   const resultCompatGrid = document.getElementById('result-compat-grid');
   const resultNamingGrid = document.getElementById('result-naming-grid');
+  const resultDailyGrid = document.getElementById('result-daily-grid');
 
   // タブ要素
   const tabButtons = document.querySelectorAll('.tab-button');
@@ -61,7 +66,6 @@ function initApp() {
   let useMock = localStorage.getItem('miyabi_use_mock') === 'true';
   let enableSound = localStorage.getItem('miyabi_enable_sound') !== 'false';
 
-  // APIキーが無い場合は自動的にモックモードをONにする
   if (!apiKey) {
     useMock = true;
   }
@@ -72,40 +76,21 @@ function initApp() {
   checkboxEnableSound.checked = enableSound;
   updateApiStatusUI();
   
-  // 履歴のロードと描画
   loadHistory();
 
   // --- イベントリスナー ---
 
-  // モード切り替え
-  tabModeSingle.addEventListener('click', () => {
-    switchMode('single');
-  });
+  tabModeSingle.addEventListener('click', () => { switchMode('single'); });
+  tabModeCompat.addEventListener('click', () => { switchMode('compat'); });
+  tabModeNaming.addEventListener('click', () => { switchMode('naming'); });
+  tabModeDaily.addEventListener('click', () => { switchMode('daily'); });
 
-  tabModeCompat.addEventListener('click', () => {
-    switchMode('compat');
-  });
-
-  tabModeNaming.addEventListener('click', () => {
-    switchMode('naming');
-  });
-
-  // 設定モーダルの開閉
-  btnSettings.addEventListener('click', () => {
-    modalSettings.classList.remove('hidden');
-  });
-
-  btnCloseSettings.addEventListener('click', () => {
-    modalSettings.classList.add('hidden');
-  });
-
+  btnSettings.addEventListener('click', () => { modalSettings.classList.remove('hidden'); });
+  btnCloseSettings.addEventListener('click', () => { modalSettings.classList.add('hidden'); });
   modalSettings.addEventListener('click', (e) => {
-    if (e.target === modalSettings) {
-      modalSettings.classList.add('hidden');
-    }
+    if (e.target === modalSettings) modalSettings.classList.add('hidden');
   });
 
-  // 設定保存
   btnSaveSettings.addEventListener('click', () => {
     apiKey = inputApiKey.value.trim();
     useMock = checkboxUseMock.checked;
@@ -124,7 +109,6 @@ function initApp() {
     modalSettings.classList.add('hidden');
   });
 
-  // オプションフィールドの開閉
   btnToggleOptions.addEventListener('click', () => {
     const isHidden = optionalFields.classList.contains('hidden');
     if (isHidden) {
@@ -136,13 +120,11 @@ function initApp() {
     }
   });
 
-  // 結果内のタブ切り替え
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
       const targetTab = button.getAttribute('data-tab');
-      
       const parentCard = button.closest('.ai-reading-card');
-      if (!parentCard) return; // 命名モードにはタブがないため
+      if (!parentCard) return;
       const siblings = parentCard.querySelectorAll('.tab-button');
       const contents = parentCard.querySelectorAll('.tab-content');
 
@@ -159,18 +141,20 @@ function initApp() {
     currentMode = mode;
     resetValidation();
 
-    // アクティブタブのスタイル切り替え
     tabModeSingle.classList.remove('active');
     tabModeCompat.classList.remove('active');
     tabModeNaming.classList.remove('active');
+    tabModeDaily.classList.remove('active');
 
     formSingleFields.classList.add('hidden');
     formCompatFields.classList.add('hidden');
     formNamingFields.classList.add('hidden');
+    formDailyFields.classList.add('hidden');
 
     singleOptionalGrid.classList.add('hidden');
     compatOptionalGrid.classList.add('hidden');
     namingOptionalGrid.classList.add('hidden');
+    dailyOptionalGrid.classList.add('hidden');
 
     if (mode === 'single') {
       tabModeSingle.classList.add('active');
@@ -201,10 +185,18 @@ function initApp() {
 
       document.getElementById('naming-last-name').required = true;
       document.getElementById('naming-last-name-kana').required = true;
+    } else if (mode === 'daily') {
+      tabModeDaily.classList.add('active');
+      formDailyFields.classList.remove('hidden');
+      dailyOptionalGrid.classList.remove('hidden');
+
+      document.getElementById('daily-last-name').required = true;
+      document.getElementById('daily-first-name').required = true;
+      document.getElementById('daily-last-name-kana').required = true;
+      document.getElementById('daily-first-name-kana').required = true;
     }
   }
 
-  // バリデーション必須属性の全解除
   function resetValidation() {
     document.querySelectorAll('#fortune-form input').forEach(input => input.required = false);
   }
@@ -213,39 +205,21 @@ function initApp() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // おりんの音を鳴らす
-    if (enableSound) {
-      playOring();
-    }
+    if (enableSound) playOring();
 
-    // UI状態の更新 (ローディングへ)
     form.parentElement.classList.add('hidden');
     loadingSection.classList.remove('hidden');
     resultSection.classList.add('hidden');
 
-    // ローディングテキスト
     let loadingTexts = [];
     if (currentMode === 'single') {
-      loadingTexts = [
-        "天格・地格・人格を解析中...",
-        "陰陽のバランスと五行の調和を測定中...",
-        "AIが名前に込められた本質を読み解いています...",
-        "天命のアドバイスを組み立てています..."
-      ];
+      loadingTexts = ["天格・地格・人格を解析中...", "陰陽のバランスと五行の調和を測定中...", "AIが名前に込められた本質を読み解いています...", "天命のアドバイスを組み立てています..."];
     } else if (currentMode === 'compat') {
-      loadingTexts = [
-        "二人の画数を算出中...",
-        "五行の相性と引き合う力を測定中...",
-        "AIが二人の縁（えにし）を読み解いています...",
-        "調和のアドバイスを組み立てています..."
-      ];
+      loadingTexts = ["二人の画数を算出中...", "五行の相性と引き合う力を測定中...", "AIが二人の縁（えにし）を読み解いています...", "調和のアドバイスを組み立てています..."];
+    } else if (currentMode === 'naming') {
+      loadingTexts = ["名字の画数から吉数を算出中...", "漢字の成り立ちと吉凶バランスを精査中...", "AIが最高の漢字リコメンド候補を選定しています...", "祝福のアドバイスを組み立てています..."];
     } else {
-      loadingTexts = [
-        "名字の画数から吉数を算出中...",
-        "漢字の成り立ちと吉凶バランスを精査中...",
-        "AIが最高の漢字リコメンド候補を選定しています...",
-        "祝福のアドバイスを組み立てています..."
-      ];
+      loadingTexts = ["今日の天体の動きをスキャン中...", "名前と日付の波長を干渉測定中...", "AIが本日の数霊運を組み立てています...", "今日の開運行動を決定中..."];
     }
 
     let textIndex = 0;
@@ -275,9 +249,7 @@ function initApp() {
         }
 
         currentResult = {
-          type: 'single',
-          lastName, firstName, lastNameKana, firstNameKana,
-          data: resultData
+          type: 'single', lastName, firstName, lastNameKana, firstNameKana, data: resultData
         };
 
         displayResultSingle(resultData, lastName, firstName, lastNameKana, firstNameKana);
@@ -331,24 +303,49 @@ function initApp() {
         }
 
         currentResult = {
-          type: 'naming',
-          lastName, lastNameKana, firstNameKana, gender, wish,
-          data: resultData
+          type: 'naming', lastName, lastNameKana, firstNameKana, gender, wish, data: resultData
         };
 
         displayResultNaming(resultData, lastName, lastNameKana);
+      } else if (currentMode === 'daily') {
+        const lastName = document.getElementById('daily-last-name').value.trim();
+        const firstName = document.getElementById('daily-first-name').value.trim();
+        const lastNameKana = document.getElementById('daily-last-name-kana').value.trim();
+        const firstNameKana = document.getElementById('daily-first-name-kana').value.trim();
+
+        let resultData;
+        if (useMock) {
+          await new Promise(resolve => setTimeout(resolve, 2500));
+          resultData = getMockDataDaily(lastName, firstName);
+        } else {
+          resultData = await callGeminiAPIDaily(apiKey, {
+            lastName, firstName, lastNameKana, firstNameKana
+          });
+        }
+
+        currentResult = {
+          type: 'daily', lastName, firstName, lastNameKana, firstNameKana, data: resultData
+        };
+
+        displayResultDaily(resultData, lastName, firstName, lastNameKana, firstNameKana);
       }
 
-      // 「鑑定帳に保存」ボタンを初期化
+      // 「鑑定帳に保存」ボタンの状態復元
       btnSaveHistory.disabled = false;
       btnSaveHistory.innerHTML = '<i data-lucide="bookmark"></i><span>鑑定帳に保存</span>';
+      
+      // お守り保存ボタンを表示制御（個人鑑定・日運鑑定時のみ有効、それ以外は非表示）
+      if (currentMode === 'single' || currentMode === 'daily') {
+        btnDownloadAmulet.classList.remove('hidden');
+      } else {
+        btnDownloadAmulet.classList.add('hidden');
+      }
+
       lucide.createIcons();
 
     } catch (error) {
       console.error(error);
       alert(`エラーが発生しました: ${error.message}\n設定画面でAPIキーを確認するか、モックモードでお試しください。`);
-      
-      // フォームに戻す
       form.parentElement.classList.remove('hidden');
       resetTheme();
     } finally {
@@ -357,7 +354,7 @@ function initApp() {
     }
   });
 
-  // リセットボタン (もう一度占う)
+  // リセットボタン
   btnReset.addEventListener('click', () => {
     resultSection.classList.add('hidden');
     form.parentElement.classList.remove('hidden');
@@ -365,7 +362,6 @@ function initApp() {
     optionalFields.classList.add('hidden');
     optionsChevron.classList.remove('rotate');
     
-    // タブを一番最初に戻す
     const firstTabs = document.querySelectorAll('.ai-tabs');
     firstTabs.forEach(tabs => {
       const firstBtn = tabs.querySelector('.tab-button');
@@ -375,14 +371,13 @@ function initApp() {
     resetTheme();
   });
 
-  // 鑑定履歴（鑑定帳）に保存
+  // 鑑定帳に保存
   btnSaveHistory.addEventListener('click', () => {
     if (!currentResult) return;
 
-    // 重複チェック
     const isDuplicate = historyData.some(item => {
       if (item.type !== currentResult.type) return false;
-      if (item.type === 'single') {
+      if (item.type === 'single' || item.type === 'daily') {
         return item.lastName === currentResult.lastName && item.firstName === currentResult.firstName;
       } else if (item.type === 'compat') {
         return item.lastName1 === currentResult.lastName1 && item.firstName1 === currentResult.firstName1 &&
@@ -399,7 +394,6 @@ function initApp() {
       return;
     }
 
-    // 履歴データに追加
     const newHistoryItem = {
       id: Date.now().toString(),
       date: new Date().toLocaleDateString('ja-JP'),
@@ -411,13 +405,12 @@ function initApp() {
     
     renderHistoryUI();
 
-    // 保存ボタンの状態変更
     btnSaveHistory.disabled = true;
     btnSaveHistory.innerHTML = '<i data-lucide="check"></i><span>保存されました</span>';
     lucide.createIcons();
   });
 
-  // 結果をコピー・シェア
+  // 結果をコピー
   btnShareResult.addEventListener('click', () => {
     if (!currentResult) return;
 
@@ -426,6 +419,7 @@ function initApp() {
       const d = currentResult.data;
       shareText = `【雅 AI姓名判断】\n${currentResult.lastName} ${currentResult.firstName} 殿の鑑定結果\n`;
       shareText += `総格：${d.sokaku.score}画 (${d.sokaku.fortune})\n`;
+      shareText += `開運色：${d.luckyColor} / 開運品：${d.luckyItem}\n`;
       shareText += `本質：${d.essence.substring(0, 80)}...\n`;
       shareText += `#雅AI姓名判断\n`;
     } else if (currentResult.type === 'compat') {
@@ -435,15 +429,22 @@ function initApp() {
       shareText += `二人の共鳴度：${d.compatRate}%\n`;
       shareText += `基本相性：${d.essence.substring(0, 80)}...\n`;
       shareText += `#雅AI姓名判断\n`;
-    } else {
+    } else if (currentResult.type === 'naming') {
       const d = currentResult.data;
       shareText = `【雅 AI命名鑑定】\n`;
       shareText += `${currentResult.lastName}家の子供の命名候補\n`;
       shareText += `名字天格：${d.tenkaku}画 / おすすめ画数：${d.bestScores}\n`;
-      shareText += `【命名候補】\n`;
       d.candidates.forEach((c, idx) => {
         shareText += `${idx+1}. ${currentResult.lastName} ${c.kanji} (${c.kana}) - 総格${c.scores.sokaku.score}画 (${c.scores.sokaku.fortune})\n`;
       });
+      shareText += `#雅AI姓名判断\n`;
+    } else {
+      const d = currentResult.data;
+      shareText = `【雅 AI本日の運勢】\n`;
+      shareText += `${currentResult.lastName} ${currentResult.firstName} 殿\n`;
+      shareText += `今日の総合波長：${'★'.repeat(d.stars)}${'☆'.repeat(5-d.stars)}\n`;
+      shareText += `ラッキーカラー：${d.luckyColor} / ラッキーアイテム：${d.luckyItem}\n`;
+      shareText += `今日のアドバイス：${d.flow.substring(0, 80)}...\n`;
       shareText += `#雅AI姓名判断\n`;
     }
 
@@ -452,6 +453,12 @@ function initApp() {
     }).catch(err => {
       console.error('コピー失敗:', err);
     });
+  });
+
+  // お守り画像の生成とダウンロード
+  btnDownloadAmulet.addEventListener('click', () => {
+    if (!currentResult) return;
+    generateAmuletImage(currentResult);
   });
 
   // APIステータス表示の更新
@@ -470,7 +477,7 @@ function initApp() {
     }
   }
 
-  // 履歴の読み込み
+  // 履歴のロード・描画
   function loadHistory() {
     const stored = localStorage.getItem('miyabi_fortune_history');
     if (stored) {
@@ -483,7 +490,6 @@ function initApp() {
     renderHistoryUI();
   }
 
-  // 履歴UIの描画
   function renderHistoryUI() {
     const historyList = document.getElementById('history-list');
     const emptyText = document.getElementById('history-empty-text');
@@ -517,12 +523,17 @@ function initApp() {
         scoreText = `共鳴度: ${item.data.compatRate}%`;
         badgeClass = 'type-compat';
         badgeLabel = '相性';
-      } else {
+      } else if (item.type === 'naming') {
         title = `${item.lastName}家 命名`;
         const candNames = item.data.candidates.map(c => c.kanji).join(', ');
         scoreText = `候補: ${candNames}`;
         badgeClass = 'type-naming';
         badgeLabel = '命名';
+      } else {
+        title = `${item.lastName} ${item.firstName}`;
+        scoreText = `今日の運勢: ★${item.data.stars}`;
+        badgeClass = 'type-daily';
+        badgeLabel = '日運';
       }
 
       card.innerHTML = `
@@ -536,13 +547,11 @@ function initApp() {
         </button>
       `;
 
-      // 履歴クリックで結果を復元
       card.addEventListener('click', (e) => {
         if (e.target.closest('.btn-delete-history')) return;
         restoreHistoryItem(item);
       });
 
-      // 削除ボタンイベント
       const btnDelete = card.querySelector('.btn-delete-history');
       btnDelete.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -555,7 +564,6 @@ function initApp() {
     lucide.createIcons();
   }
 
-  // 履歴アイテムの削除
   function deleteHistoryItem(id) {
     if (!confirm('この鑑定履歴を鑑定帳から削除しますか？')) return;
     historyData = historyData.filter(item => item.id !== id);
@@ -563,7 +571,6 @@ function initApp() {
     renderHistoryUI();
   }
 
-  // 履歴からの結果復元表示
   function restoreHistoryItem(item) {
     form.parentElement.classList.add('hidden');
     resultSection.classList.remove('hidden');
@@ -575,53 +582,36 @@ function initApp() {
       displayResultSingle(item.data, item.lastName, item.firstName, item.lastNameKana, item.firstNameKana);
     } else if (item.type === 'compat') {
       displayResultCompat(item.data, item.lastName1, item.firstName1, item.lastName2, item.firstName2);
-    } else {
+    } else if (item.type === 'naming') {
       displayResultNaming(item.data, item.lastName, item.lastNameKana);
+    } else {
+      displayResultDaily(item.data, item.lastName, item.firstName, item.lastNameKana, item.firstNameKana);
     }
 
-    // 保存ボタンを無効化
     btnSaveHistory.disabled = true;
     btnSaveHistory.innerHTML = '<i data-lucide="check"></i><span>保存済み</span>';
-    lucide.createIcons();
+    
+    if (currentMode === 'single' || currentMode === 'daily') {
+      btnDownloadAmulet.classList.remove('hidden');
+    } else {
+      btnDownloadAmulet.classList.add('hidden');
+    }
 
+    lucide.createIcons();
     resultSection.scrollIntoView({ behavior: 'smooth' });
   }
-}
-
-// テーマカラーのリセット
-function resetTheme() {
-  document.body.className = '';
 }
 
 // --- Web Audio API による「おりん」の合成発音 ---
 let audioCtx = null;
 function playOring() {
   try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
 
     const now = audioCtx.currentTime;
-    
-    const frequencies = [
-      650.0, 650.8, // 基音（うなりを作る）
-      1014.0,       // 第2倍音 (1.56倍)
-      1430.0,       // 第3倍音 (2.2倍)
-      1780.0,       // 第4倍音 (2.73倍)
-      2340.0        // 高周波の金属振動成分
-    ];
-    
-    const gains = [
-      0.35, 0.35,
-      0.15,
-      0.08,
-      0.05,
-      0.02
-    ];
+    const frequencies = [650.0, 650.8, 1014.0, 1430.0, 1780.0, 2340.0];
+    const gains = [0.35, 0.35, 0.15, 0.08, 0.05, 0.02];
 
     const masterGain = audioCtx.createGain();
     masterGain.gain.setValueAtTime(0.001, now);
@@ -656,23 +646,36 @@ function displayResultSingle(data, lastName, firstName, lastNameKana, firstNameK
   const resultSingleGrid = document.getElementById('result-single-grid');
   const resultCompatGrid = document.getElementById('result-compat-grid');
   const resultNamingGrid = document.getElementById('result-naming-grid');
+  const resultDailyGrid = document.getElementById('result-daily-grid');
 
   resultSingleGrid.classList.remove('hidden');
   resultCompatGrid.classList.add('hidden');
   resultNamingGrid.classList.add('hidden');
+  resultDailyGrid.classList.add('hidden');
 
-  // 名前とカナのセット
   document.getElementById('result-name').textContent = `${lastName} ${firstName} 殿`;
   document.getElementById('result-kana').textContent = `${lastNameKana} ${firstNameKana}`;
 
-  // 各格の点数とバッジの反映
   setScoreUI('score-ten', data.tenkaku);
   setScoreUI('score-jin', data.jinkaku);
   setScoreUI('score-chi', data.chikaku);
   setScoreUI('score-gai', data.gaikaku);
   setScoreUI('score-so', data.sokaku);
 
-  // 背景テーマ
+  // 開運色と開運アイテムの表示
+  document.getElementById('single-lucky-color-text').textContent = data.luckyColor;
+  document.getElementById('single-lucky-item-text').textContent = data.luckyItem;
+  document.getElementById('single-lucky-color-preview').style.backgroundColor = data.luckyColorCode || '#ffffff';
+
+  // レーダーチャートの描画を実行
+  drawRadarChart({
+    ten: data.tenkaku.fortune,
+    jin: data.jinkaku.fortune,
+    chi: data.chikaku.fortune,
+    gai: data.gaikaku.fortune,
+    so: data.sokaku.fortune
+  });
+
   const soFortune = data.sokaku.fortune;
   resetTheme();
   if (soFortune.includes('大吉')) {
@@ -683,10 +686,8 @@ function displayResultSingle(data, lastName, firstName, lastNameKana, firstNameK
     document.body.classList.add('theme-kyou');
   }
 
-  // 結果セクションを表示
   document.getElementById('result-section').classList.remove('hidden');
 
-  // AI鑑定テキストのクリアと流し込み
   const essenceTarget = document.getElementById('ai-essence-text');
   const destinyTarget = document.getElementById('ai-destiny-text');
   const adviceTarget = document.getElementById('ai-advice-text');
@@ -701,10 +702,12 @@ function displayResultCompat(data, lastName1, firstName1, lastName2, firstName2)
   const resultSingleGrid = document.getElementById('result-single-grid');
   const resultCompatGrid = document.getElementById('result-compat-grid');
   const resultNamingGrid = document.getElementById('result-naming-grid');
+  const resultDailyGrid = document.getElementById('result-daily-grid');
 
   resultSingleGrid.classList.add('hidden');
   resultCompatGrid.classList.remove('hidden');
   resultNamingGrid.classList.add('hidden');
+  resultDailyGrid.classList.add('hidden');
 
   document.getElementById('result-name').textContent = `${firstName1} × ${firstName2}`;
   document.getElementById('result-kana').textContent = `${lastName1}${firstName1} と ${lastName2}${firstName2}`;
@@ -740,20 +743,20 @@ function displayResultNaming(data, lastName, lastNameKana) {
   const resultSingleGrid = document.getElementById('result-single-grid');
   const resultCompatGrid = document.getElementById('result-compat-grid');
   const resultNamingGrid = document.getElementById('result-naming-grid');
+  const resultDailyGrid = document.getElementById('result-daily-grid');
 
   resultSingleGrid.classList.add('hidden');
   resultCompatGrid.classList.add('hidden');
   resultNamingGrid.classList.remove('hidden');
+  resultDailyGrid.classList.add('hidden');
 
   document.getElementById('result-name').textContent = `${lastName}家 命名鑑定`;
   document.getElementById('result-kana').textContent = `${lastNameKana}け めいめいかんてい`;
 
-  // 名字の画数分析のセット
   document.getElementById('naming-ten-val').textContent = `${data.tenkaku}画`;
   document.getElementById('naming-best-scores').textContent = data.bestScores;
   document.getElementById('naming-analysis-desc').textContent = data.advice;
 
-  // 漢字候補カードの動的生成
   const container = document.getElementById('naming-candidates-container');
   container.innerHTML = '';
 
@@ -761,7 +764,6 @@ function displayResultNaming(data, lastName, lastNameKana) {
     const card = document.createElement('div');
     card.className = 'naming-candidate-card';
 
-    // 吉凶に応じたバッジクラス
     const getBadgeClass = (f) => {
       if (f.includes('大吉')) return 'badge-daikichi';
       if (f.includes('吉')) return 'badge-kichi';
@@ -809,15 +811,50 @@ function displayResultNaming(data, lastName, lastNameKana) {
     container.appendChild(card);
   });
 
-  // お祝いメッセージの設定（タイピング風）
   const blessingTarget = document.getElementById('naming-blessing-text');
   typeWriter(data.blessing, blessingTarget, 15);
 
-  // 背景テーマを命名テーマに変更
   resetTheme();
   document.body.classList.add('theme-naming');
 
   document.getElementById('result-section').classList.remove('hidden');
+}
+
+// --- 今日の運勢用：結果表示 ---
+function displayResultDaily(data, lastName, firstName, lastNameKana, firstNameKana) {
+  const resultSingleGrid = document.getElementById('result-single-grid');
+  const resultCompatGrid = document.getElementById('result-compat-grid');
+  const resultNamingGrid = document.getElementById('result-naming-grid');
+  const resultDailyGrid = document.getElementById('result-daily-grid');
+
+  resultSingleGrid.classList.add('hidden');
+  resultCompatGrid.classList.add('hidden');
+  resultNamingGrid.classList.add('hidden');
+  resultDailyGrid.classList.remove('hidden');
+
+  document.getElementById('result-name').textContent = `${lastName} ${firstName} 殿`;
+  document.getElementById('result-kana').textContent = `今日の天命歩数計: ${lastNameKana} ${firstNameKana}`;
+
+  // 星マーク (★) の描画
+  const starsBox = document.getElementById('daily-stars-box');
+  const starCount = data.stars || 3;
+  starsBox.textContent = '★'.repeat(starCount) + '☆'.repeat(5 - starCount);
+
+  // ラッキーカラー＆アイテム
+  document.getElementById('daily-lucky-color-text').textContent = data.luckyColor;
+  document.getElementById('daily-lucky-item-text').textContent = data.luckyItem;
+  document.getElementById('daily-lucky-color-preview').style.backgroundColor = data.luckyColorCode || '#ffffff';
+
+  resetTheme();
+  document.body.classList.add('theme-daily');
+
+  document.getElementById('result-section').classList.remove('hidden');
+
+  const dailyFlowTarget = document.getElementById('ai-daily-flow-text');
+  const dailyActionTarget = document.getElementById('ai-daily-action-text');
+
+  typeWriter(data.flow, dailyFlowTarget, 12);
+  typeWriter(data.action, dailyActionTarget, 12);
 }
 
 // スコアUIのヘルパー
@@ -837,19 +874,213 @@ function setScoreUI(elementId, scoreData) {
   element.innerHTML = `${score} <span class="fortune-badge ${badgeClass}">${fortune}</span>`;
 }
 
-// タイピング風テキスト演出
-function typeWriter(text, element, speed = 20) {
-  let i = 0;
-  element.textContent = '';
-  
-  function type() {
-    if (i < text.length) {
-      element.textContent += text.charAt(i);
-      i++;
-      setTimeout(type, speed);
+// --- HTML5 Canvas による五格レーダーチャートの動的描画 ---
+function drawRadarChart(fortunes) {
+  const canvas = document.getElementById('radar-chart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const labels = ["天格", "人格", "地格", "外格", "総格"];
+  const keys = ["ten", "jin", "chi", "gai", "so"];
+
+  // 吉凶を1〜5の数値に変換
+  const getFortuneValue = (fortune) => {
+    if (fortune.includes('大吉')) return 5;
+    if (fortune.includes('大凶')) return 1;
+    if (fortune.includes('吉')) return 4;
+    if (fortune.includes('小吉') || fortune.includes('半吉')) return 3.5;
+    if (fortune.includes('中吉') || fortune.includes('吉凶半々')) return 3;
+    if (fortune.includes('凶')) return 1.8;
+    return 2.5; // その他
+  };
+
+  const dataValues = keys.map(key => getFortuneValue(fortunes[key]));
+
+  const center = canvas.width / 2;
+  const radius = center - 35;
+  const sides = 5;
+
+  // 1. ガイドライン（同心五角形）の描画
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 1;
+  for (let r = 1; r <= 5; r++) {
+    const currentRadius = (radius / 5) * r;
+    ctx.beginPath();
+    for (let i = 0; i < sides; i++) {
+      const angle = (Math.PI * 2 / sides) * i - Math.PI / 2;
+      const x = center + Math.cos(angle) * currentRadius;
+      const y = center + Math.sin(angle) * currentRadius;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     }
+    ctx.closePath();
+    ctx.stroke();
   }
-  type();
+
+  // 2. 軸線の描画
+  ctx.beginPath();
+  for (let i = 0; i < sides; i++) {
+    const angle = (Math.PI * 2 / sides) * i - Math.PI / 2;
+    ctx.moveTo(center, center);
+    ctx.lineTo(center + Math.cos(angle) * radius, center + Math.sin(angle) * radius);
+  }
+  ctx.stroke();
+
+  // 3. データエリアのプロットと描画
+  ctx.fillStyle = 'rgba(223, 186, 92, 0.28)'; // 金色の半透明
+  ctx.strokeStyle = '#dfba5c'; // 金色
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i < sides; i++) {
+    const angle = (Math.PI * 2 / sides) * i - Math.PI / 2;
+    const valueRadius = (radius / 5) * dataValues[i];
+    const x = center + Math.cos(angle) * valueRadius;
+    const y = center + Math.sin(angle) * valueRadius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // データポイントの丸を描画
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < sides; i++) {
+    const angle = (Math.PI * 2 / sides) * i - Math.PI / 2;
+    const valueRadius = (radius / 5) * dataValues[i];
+    const x = center + Math.cos(angle) * valueRadius;
+    const y = center + Math.sin(angle) * valueRadius;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  // 4. 文字ラベルの描画
+  ctx.fillStyle = '#9c9ab0';
+  ctx.font = "bold 11px 'Noto Serif JP', serif";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  for (let i = 0; i < sides; i++) {
+    const angle = (Math.PI * 2 / sides) * i - Math.PI / 2;
+    const labelX = center + Math.cos(angle) * (radius + 20);
+    const labelY = center + Math.sin(angle) * (radius + 15);
+    ctx.fillText(labels[i], labelX, labelY);
+  }
+}
+
+// --- HTML5 Canvas によるお守り画像（千社札風）の生成・ダウンロード ---
+function generateAmuletImage(result) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 450;
+  canvas.height = 750;
+  const ctx = canvas.getContext('2d');
+
+  // 1. 背景のグラデーション（高級感のある漆黒〜深紫）
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0, '#0e0d12');
+  grad.addColorStop(0.5, '#191522');
+  grad.addColorStop(1, '#08070a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 2. 二重の金枠（和モダン境界）
+  ctx.strokeStyle = '#dfba5c';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(23, 23, canvas.width - 46, canvas.height - 46);
+
+  // 金の和風角飾りを描く
+  const drawCorner = (x, y, dx, dy) => {
+    ctx.strokeStyle = '#dfba5c';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x + dx * 20, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y + dy * 20);
+    ctx.stroke();
+  };
+  drawCorner(28, 28, 1, 1);
+  drawCorner(canvas.width - 28, 28, -1, 1);
+  drawCorner(28, canvas.height - 28, 1, -1);
+  drawCorner(canvas.width - 28, canvas.height - 28, -1, -1);
+
+  // 3. 千社札の札枠（中央の白木目調あるいは半透明枠）
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+  ctx.strokeStyle = 'rgba(223, 186, 92, 0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(60, 60, canvas.width - 120, canvas.height - 120, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  // 4. 文字描画（縦書き処理）
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // 文字を縦書きに描画するヘルパー
+  const drawVerticalText = (text, x, y, font, color, spacing = 40) => {
+    ctx.font = font;
+    ctx.fillStyle = color;
+    for (let i = 0; i < text.length; i++) {
+      ctx.fillText(text.charAt(i), x, y + i * spacing);
+    }
+  };
+
+  // 4-1. お守りタイトル（上部横書き）
+  ctx.font = "bold 15px 'Outfit', sans-serif";
+  ctx.fillStyle = '#ffb5c5'; // 桜色
+  ctx.letterSpacing = '4px';
+  ctx.fillText("雅  AI  姓名  守  護  符", canvas.width / 2, 95);
+
+  // 4-2. 氏名（中央巨大縦書き）
+  let name = "";
+  let subText = "";
+  let fortune = "";
+
+  if (result.type === 'single') {
+    name = `${result.lastName} ${result.firstName}`;
+    subText = `総格 ${result.data.sokaku.score}画`;
+    fortune = result.data.sokaku.fortune;
+  } else if (result.type === 'daily') {
+    name = `${result.lastName} ${result.firstName}`;
+    subText = "本日の数霊運";
+    fortune = `波長 ★${result.data.stars}`;
+  }
+
+  // 名前縦書き
+  drawVerticalText(name, canvas.width / 2, 170, "900 36px 'Noto Serif JP', serif", '#f3f3f6', 48);
+
+  // 4-3. 右側に総格などの補足（縦書き）
+  drawVerticalText(subText, canvas.width / 2 + 100, 200, "bold 18px 'Noto Serif JP', serif", '#9c9ab0', 25);
+
+  // 4-4. 左側に吉凶運勢（縦書き）
+  drawVerticalText(fortune, canvas.width / 2 - 100, 200, "900 24px 'Noto Serif JP', serif", '#dfba5c', 30);
+
+  // 5. 雅の朱印（スタンプ効果）を右下に配置
+  const stampX = canvas.width / 2 + 80;
+  const stampY = canvas.height - 130;
+  ctx.strokeStyle = '#ff4500'; // 朱色
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.arc(stampX, stampY, 26, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  ctx.fillStyle = '#ff4500';
+  ctx.font = "900 16px 'Noto Serif JP', serif";
+  ctx.fillText("雅", stampX, stampY - 8);
+  ctx.fillText("印", stampX, stampY + 10);
+
+  // 6. 画像のダウンロード
+  const dataURL = canvas.toDataURL('image/png');
+  const link = document.createElement('a');
+  link.download = `雅_お守り_${name.replace(" ", "")}.png`;
+  link.href = dataURL;
+  link.click();
 }
 
 // --- Gemini API 連携（個人鑑定） ---
@@ -869,7 +1100,8 @@ ${params.gender ? `- 性別: ${params.gender}` : ''}
 
 【姓名判断のルール】
 1. 各格（天格・人格・地格・外格・総格）の画数を厳密に計算（または算出）し、その吉凶（大吉、吉、小吉、中吉/吉凶半々、凶、大凶など）を決定してください。
-2. 鑑定結果は以下のJSONフォーマットで返却してください。余計なマークダウンや説明テキストは含めず、純粋なJSONのみを返してください。
+2. 陰陽五行（木・火・土・金・水）のバランスから、この人のエネルギーを最も調和させる「ラッキーカラー」と「ラッキーアイテム」を導き出してください。
+3. 鑑定結果は以下のJSONフォーマットで返却してください。余計なマークダウンや説明テキストは含めず、純粋なJSONのみを返してください。
 
 【出力JSONフォーマット】
 {
@@ -878,6 +1110,9 @@ ${params.gender ? `- 性別: ${params.gender}` : ''}
   "chikaku": { "score": 数値, "fortune": "吉凶" },
   "gaikaku": { "score": 数値, "fortune": "吉凶" },
   "sokaku": { "score": 数値, "fortune": "吉凶" },
+  "luckyColor": "ラッキーカラー名（例：『瑠璃色 (ダークブルー)』など、情緒的な和名＋一般的な英名）",
+  "luckyColorCode": "ラッキーカラーのカラーコード（例：『#0047ab』など、必ず有効な16進数HEXカラーコード）",
+  "luckyItem": "ラッキーアイテム（日常生活で身につけたり置いたりしやすいもの）",
   "essence": "【本質・性格の鑑定結果】（200文字〜300文字程度。人格から読み取れる本質的な性格特性を丁寧に解説してください）",
   "destiny": "【人生・仕事運の鑑定結果】（200文字〜300文字程度。社会的な成功運、適職、人生のバイオリズムについて解説してください）",
   "advice": "【吉凶と助言】（150文字〜200文字程度。総格を踏まえた総合的な運勢のまとめと開運アドバイスを優しく伝えてください）"
@@ -934,7 +1169,7 @@ async function callGeminiAPICompat(key, params) {
 【出力JSONフォーマット】
 {
   "so1": 一人目の総格の数値,
-  "so2": 二人目の総格 of 数値,
+  "so2": 二人目の総格の数値,
   "compatRate": 0から100の数値(相性共鳴度),
   "essence": "【縁（えにし）と基本相性】（200文字〜300文字程度。響きや五行のバランスから基本的な引き合う強さについて解説してください）",
   "synergy": "【発展とシナジー】（200文字〜300文字程度。二人が協力した際に生まれる相乗効果について解説してください）",
@@ -978,45 +1213,95 @@ async function callGeminiAPINaming(key, params) {
   const elementText = params.element ? `重視したい五行・要素: ${params.element}` : '';
 
   const prompt = `
-あなたは一流の姓名判断鑑定士であり、陰陽五行説に基づいた赤ちゃんの命名・漢字提案に精通したAIです。
+あなたは赤ちゃんの命名・漢字提案に精通した姓名判断鑑定士AIです。
 以下の条件で、子供の命名候補と漢字のリコメンドを提案してください。
 
 【条件】
 - 名字（姓）: ${params.lastName} (よみがな: ${params.lastNameKana})
 - 性別: ${genderText}
-${params.firstNameKana ? `- 希望する名前のよみがな（響き）: ${params.firstNameKana}` : '- よみがな（響き）: 名字に合うものからAIが自由に提案'}
+${params.firstNameKana ? `- 希望する名前のよみがな（響き）: ${params.firstNameKana}` : '- よみがな: 名字に合うものからAIが自由に提案'}
 ${params.wish ? `- 子供に込めたい願いやイメージ: ${params.wish}` : ''}
 ${elementText}
-
-【命名・漢字提案のルール】
-1. 名字の文字数と一般的な画数を考慮し、名字の「天格」を計算してください。
-2. 天格の画数と相性が良く、総格が「大吉」または「吉」となる、名前（地格）の最適な画数の組み合わせ（吉数）を割り出してください。
-3. その吉数に合う漢字の組み合わせを「3パターン」リコメンドしてください。
-   ※「希望する名前のよみがな」が入力されている場合は、そのよみがなに沿った漢字の組み合わせにしてください。
-   ※入力されていない場合は、願いやイメージに沿った美しい響きのよみがなをAIが選定して漢字を提案してください。
-4. 各漢字候補について、天格・人格・地格・外格・総格の画数とそれぞれの吉凶（大吉、吉、小吉、中吉、凶など）を姓名判断に基づいて算出してください。
-5. 返却値は以下のJSONフォーマットのみにしてください。余計なマークダウンや説明は省いてください。
 
 【出力JSONフォーマット】
 {
   "tenkaku": 名字の天格数値,
-  "bestScores": "おすすめの画数の組み合わせの文字列（例：『地格16画・総格31画』や『地格15・24画』など）",
-  "advice": "名字の画数からみた吉数配置に関するアドバイスや説明（80文字〜120文字程度）",
+  "bestScores": "おすすめの画数の組み合わせ（例：『地格16画・総格31画』など）",
+  "advice": "名字の画数からみた吉数配置に関するアドバイス（80文字〜120文字程度）",
   "candidates": [
     {
-      "kanji": "名前の漢字（例：『大翔』や『ひなた』等）",
+      "kanji": "名前の漢字",
       "kana": "よみがな（ひらがな）",
-      "meanings": "漢字の意味、成り立ち、そして『込められた願いやイメージ』との関連性の解説（120文字〜180文字程度）",
+      "meanings": "漢字の意味、成り立ち、そして込められた願いとの関連性の解説（120文字〜180文字程度）",
       "scores": {
-        "tenkaku": { "score": 名字天格の数値, "fortune": "天格の吉凶（例：吉）" },
-        "jinkaku": { "score": 人格の数値, "fortune": "人格の吉凶" },
-        "chikaku": { "score": 地格の数値, "fortune": "地格の吉凶" },
-        "gaikaku": { "score": 外格の数値, "fortune": "外格の吉凶" },
-        "sokaku": { "score": 総格の数値, "fortune": "総格の吉凶" }
+        "tenkaku": { "score": 名字天格の数値, "fortune": "家運" },
+        "jinkaku": { "score": 人格の数値, "fortune": "吉凶" },
+        "chikaku": { "score": 地格の数値, "fortune": "吉凶" },
+        "gaikaku": { "score": 外格の数値, "fortune": "吉凶" },
+        "sokaku": { "score": 総格の数値, "fortune": "吉凶" }
       }
     }
   ],
   "blessing": "子供の未来への温かい祝福と名付けに関する優しいアドバイスメッセージ（120文字〜180文字程度）"
+}
+`;
+
+  const requestBody = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.error?.message || `HTTPエラー ${response.status}`);
+  }
+
+  const resData = await response.json();
+  const textResult = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!textResult) throw new Error("AIからの応答が空でした。");
+
+  try {
+    return JSON.parse(textResult.trim());
+  } catch (e) {
+    throw new Error("AIが正しいデータ形式で返答できませんでした。");
+  }
+}
+
+// --- Gemini API 連携（今日の運勢） ---
+async function callGeminiAPIDaily(key, params) {
+  const model = 'gemini-1.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+
+  const today = new Date().toLocaleDateString('ja-JP');
+
+  const prompt = `
+あなたは一流の姓名判断鑑定士であり、数霊術と今日の運気の波長を読み解くAIです。
+以下の人物について、今日の日付と名前の数霊波長から、「本日の運勢」を診断してください。
+
+【対象者の情報】
+- 氏名: ${params.lastName} ${params.firstName}
+- よみがな: ${params.lastNameKana} ${params.firstNameKana}
+- 今日（診断対象日）の日付: ${today}
+
+【ルール】
+1. 今日の総合評価を1〜5の星の数で決定してください（3: 普通, 4: 良い, 5: 絶好調, 2: 停滞期, 1: 試練期）。
+2. 本日のこの人のエネルギーを最大化（または安定）させる「今日のラッキーカラー」と「今日のラッキーアイテム」を決定してください。
+3. 鑑定結果は以下のJSONフォーマットで返却してください。余計なマークダウンや説明は含めず、純粋なJSONのみを返してください。
+
+【出力JSONフォーマット】
+{
+  "stars": 1から5の数値(総合波長評価),
+  "luckyColor": "ラッキーカラー名（例：『萌黄色 (ライトグリーン)』等、和名＋一般的な英名）",
+  "luckyColorCode": "ラッキーカラーのカラーコード（例：『#00ff00』等の有効なHEXカラーコード）",
+  "luckyItem": "ラッキーアイテム",
+  "flow": "【今日の運気と波長】（120文字〜180文字程度。名前の総格と今日の日付の相性から、本日の全体的なエネルギーのバイオリズムを解説してください）",
+  "action": "【おすすめのアクション】（120文字〜180文字程度。今日運気を引き寄せるための具体的な行動や、気をつけるべき心構えを伝えてください）"
 }
 `;
 
@@ -1065,6 +1350,10 @@ function getMockDataSingle(lastName, firstName, lastNameKana, firstNameKana) {
   const fortunes = ["大吉", "吉", "吉", "小吉", "吉凶半々", "吉", "大吉", "大凶", "凶"];
   const getFortune = (val) => fortunes[val % fortunes.length];
 
+  const luckyColors = ["茜色 (マダーレッド)", "山吹色 (ゴールド)", "瑠璃色 (ロイヤルブルー)", "翡翠色 (ミントグリーン)", "桜色 (ソフトピンク)"];
+  const luckyColorCodes = ["#b7282e", "#fabf14", "#0052ad", "#38b48b", "#fef4f4"];
+  const luckyItems = ["木製のコーム", "金属製のキーホルダー", "観葉植物", "温かいハーブティー", "お気に入りの香水"];
+
   const essences = [
     `${lastName}様の持つ「水」の性質と、${firstName}様の持つ「木」の性質が美しく調和しています。本質的には非常に知的で直感力に優れ、他者の気持ちを敏感に察知できる優しい心の持ち主です。`,
     `非常に情熱的で活発なエネルギーに満ちたお名前です。${firstName}という響きには、新しい道を切り拓く強いパイオニア精神が宿っています。困難な状況にあっても決して諦めないリーダータイプです。`,
@@ -1089,6 +1378,9 @@ function getMockDataSingle(lastName, firstName, lastNameKana, firstNameKana) {
     chikaku: { score: chi, fortune: getFortune(chi) },
     gaikaku: { score: gai, fortune: getFortune(gai) },
     sokaku: { score: so, fortune: getFortune(so) },
+    luckyColor: luckyColors[hash % luckyColors.length],
+    luckyColorCode: luckyColorCodes[hash % luckyColorCodes.length],
+    luckyItem: luckyItems[hash % luckyItems.length],
     essence: essences[hash % essences.length],
     destiny: destinies[(hash >> 1) % destinies.length],
     advice: advices[(hash >> 2) % advices.length]
@@ -1127,9 +1419,7 @@ function getMockDataCompat(lastName1, firstName1, lastName2, firstName2) {
   ];
 
   return {
-    so1,
-    so2,
-    compatRate,
+    so1, so2, compatRate,
     essence: essences[hash % essences.length],
     synergy: synergies[(hash >> 1) % synergies.length],
     advice: advices[(hash >> 2) % advices.length]
@@ -1145,40 +1435,35 @@ function getMockDataNaming(lastName, lastNameKana, firstNameKana, gender, wish) 
   hash = Math.abs(hash);
 
   const ten = (lastName.length * 6 + (hash % 10)) % 25 + 10;
-  
-  // 名字の天格に合わせて、吉数となる地格と総格の組み合わせを提案
   const bestGe = 15;
   const bestSo = ten + bestGe;
 
   const boys = [
-    { kanji: "大翔", kana: "ひろと", meanings: "『大』は大きく羽ばたくこと、『翔』は空を舞うことを意味します。周囲を圧倒するダイナミックな才能を開花させ、世界の舞台で自由闊達に活躍してほしいという願いが込められています。" },
-    { kanji: "悠真", kana: "ゆうま", meanings: "『悠』はのびのびとした時の流れや広い心、『真』は嘘偽りのない誠実さを表します。自分を見失わず、他者に対して常に優しく誠実に向き合える、スケールの大きい人物になってほしいという願いです。" },
-    { kanji: "陽向", kana: "ひなた", meanings: "『陽』はさんさんと降り注ぐ太陽の光、『向』は前を向いて進む姿勢を表します。周囲を明るく照らす温かい光のような存在であり、常に希望に向かって歩み続けることを応援するお名前です。" }
+    { kanji: "大翔", kana: "ひろと", meanings: "『大』は大きく羽ばたくこと、『翔』は空を舞うことを意味します。周囲を圧倒するダイナミックな才能を開花させ、世界の舞台で自由かつ羽ばたいて活躍してほしいという願いが込められています。" },
+    { kanji: "悠真", kana: "ゆうま", meanings: "『悠』はのびのびとした時の流れや広い心、『真』は嘘偽りのない誠実さを表します。他者に対して常に優しく誠実に向き合える、スケールの大きい人物になってほしいという願いです。" },
+    { kanji: "陽向", kana: "ひなた", meanings: "『陽』は太陽の光、『向』は前を向いて進む姿勢を表します。周囲を明るく照らす温かい光のような存在であり、希望に向かって歩み続けることを応援するお名前です。" }
   ];
 
   const girls = [
-    { kanji: "陽葵", kana: "ひまり", meanings: "『陽』は暖かく明るい太陽の光、『葵』は太陽に向かってまっすぐ咲く美しい花を意味します。誰からも愛される明るさを持ち、自ら掲げた目標に凛と向かって美しく成長してほしいという願いが込められています。" },
-    { kanji: "結衣", kana: "ゆい", meanings: "『結』は人との絆や協力、『衣』は優しく包み込む衣服を表します。周囲との絆を大切にし、多くの人から愛され、人を温かく包み込める包容力のある優しい人になりますようにという願いです。" },
-    { kanji: "美咲", kana: "みさき", meanings: "『美』は調和のとれた美しさ、『咲』は才能が開花し笑顔がこぼれることを意味します。内面も外見も美しく磨き上げられ、人生の至る所で素晴らしい笑顔と才能の花を咲かせてほしいという親心が込められています。" }
+    { kanji: "陽葵", kana: "ひまり", meanings: "『陽』は暖かく明るい太陽の光、『葵』は太陽に向かってまっすぐ咲く美しい花を意味します。誰からも愛される明るさを持ち、目標に凛と向かって美しく成長してほしいという願いが込められています。" },
+    { kanji: "結衣", kana: "ゆい", meanings: "『結』は人との絆や協力、『衣』は優しく包み込む衣服を表します。周囲との絆を大切にし、人を温かく包み込める包容力のある優しい人になりますようにという願いです。" },
+    { kanji: "美咲", kana: "みさき", meanings: "『美』は調和のとれた美しさ、『咲』は才能が開花し笑顔がこぼれることを意味します。内面も外見も美しく磨き上げられ、笑顔と才能の花を咲かせてほしいという親心が込められています。" }
   ];
 
-  // 性別に応じて候補を切り替え
   let selectedCandidates = gender === 'girl' ? girls : boys;
 
-  // 希望するよみがなが入力されている場合は、そのよみがなを適用してモックを作成
   if (firstNameKana) {
     selectedCandidates = selectedCandidates.map((cand, idx) => {
       const kanjis = gender === 'girl' ? ["愛結", "陽彩", "花音"] : ["大和", "颯太", "陸斗"];
       return {
         kanji: kanjis[idx],
         kana: firstNameKana,
-        meanings: `希望された『${firstNameKana}』という美しい響きに合わせ、『${kanjis[idx]}』という漢字を当てました。名前の響きが持つ優しい波動と、画数吉数配置が奇跡的に合致した非常に素晴らしい命名です。`
+        meanings: `希望された『${firstNameKana}』という美しい響きに合わせ、『${kanjis[idx]}』という漢字を当てました。名前の響きが持つ優しい波動と、画数吉数配置が合致した非常に素晴らしい命名です。`
       };
     });
   }
 
   const resultCandidates = selectedCandidates.map(cand => {
-    // 擬似的な姓名判断スコアの生成
     const jin = (cand.kanji.length * 8 + (hash % 10)) % 25 + 10;
     const chi = bestGe;
     const gai = Math.abs((ten + chi) - jin) || 12;
@@ -1202,8 +1487,8 @@ function getMockDataNaming(lastName, lastNameKana, firstNameKana, gender, wish) 
   });
 
   const blessings = [
-    `新しい命の誕生、心よりお祝い申し上げます。${lastName}家の伝統ある画数に調和し、現代的な輝きを放つ素晴らしいお名前候補が集まりました。言葉の響きはお子様の最初の一歩であり、一生の宝物です。直感と愛情を信じて、最良の名前を贈ってあげてください。`,
-    `お子様への温かい想いが、名前の響きを通して確かに表現されています。名字との組み合わせにおいて、五行が互いを強め合う吉数配置となっており、生涯を通じて安定した守護と発展が期待できるお名前です。親子の最初のプレゼントとして、素敵な名前をお選びください。`
+    `新しい命の誕生、心よりお祝い申し上げます。${lastName}家の伝統ある画数に調和し、現代的な輝きを放つ素晴らしいお名前候補が集まりました。言葉の響きはお子様の最初の一歩であり、一生の宝物です。`,
+    `お子様への温かい想いが、名前の響きを通して確かに表現されています。名字との組み合わせにおいて、五行が互いを強め合う吉数配置となっており、生涯を通じて安定した守護と発展が期待できるお名前です。`
   ];
 
   return {
@@ -1212,5 +1497,47 @@ function getMockDataNaming(lastName, lastNameKana, firstNameKana, gender, wish) 
     advice: `${lastName}家の名字（天格 ${ten}画）は非常にどっしりとした安定感があります。これに調和する地格 ${bestGe}画の名前を合わせることで、人格・総格ともに最高クラスの大吉数が配置され、子供の個性を最大化する運気が開かれます。`,
     candidates: resultCandidates,
     blessing: blessings[hash % blessings.length]
+  };
+}
+
+// --- モックデータ生成（今日の運勢） ---
+function getMockDataDaily(lastName, firstName) {
+  const fullName = lastName + firstName;
+  
+  // 今日の日付を文字列化
+  const todayStr = new Date().toLocaleDateString('ja-JP');
+  const combName = fullName + todayStr;
+
+  let hash = 0;
+  for (let i = 0; i < combName.length; i++) {
+    hash = combName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  hash = Math.abs(hash);
+
+  const stars = 3 + (hash % 3); // 3〜5の星評価
+
+  const luckyColors = ["茜色 (マダーレッド)", "山吹色 (ゴールド)", "瑠璃色 (ロイヤルブルー)", "翡翠色 (ミントグリーン)", "桜色 (ソフトピンク)"];
+  const luckyColorCodes = ["#b7282e", "#fabf14", "#0052ad", "#38b48b", "#fef4f4"];
+  const luckyItems = ["お気に入りの本", "お気に入りの香水", "温かいお茶", "ペンケース", "レザーの財布"];
+
+  const flows = [
+    `今日のあなたのお名前の数霊は、周囲のバイオリズムと同調し、非常に調和のとれた波長を生み出しています。新しいことを始めたり、大切な人との対話を行ったりするのに最も適したエネルギーの持ち上がりを見せています。`,
+    `本日は「安定」を象徴する静かな一日になりそうです。無理に動き回るよりも、自分の内面を見つめ直し、足元を固めることで最大の幸運を呼び込める安定的な流れとなっています。`,
+    `今日は非常に活力にあふれた活発な運気です。チャンスは突然訪れる暗示がありますので、いつでも動けるフットワークの軽さを大切にすると、素晴らしい出会いや進展がもたらされるでしょう。`
+  ];
+
+  const actions = [
+    `朝一番に冷たい水を一杯飲み、大きく深呼吸をすることが今日の開運アクションです。身の回りの不要な書類や不要なファイルを少し整理するだけでも、停滞していた運気が一気に動き出します。`,
+    `今日は、日頃なかなか話す機会のない同僚や友人に一言、挨拶を投げかけてみてください。思いがけない有益なアドバイスや、新しい仕事のヒントがその会話から見つかる予感があります。`,
+    `お気に入りのカフェや静かな場所で、自分の好きな音楽を聴く時間が今日の運気をさらにパワーアップさせます。何よりもリラックスを心がけることが大切です。`
+  ];
+
+  return {
+    stars,
+    luckyColor: luckyColors[hash % luckyColors.length],
+    luckyColorCode: luckyColorCodes[hash % luckyColorCodes.length],
+    luckyItem: luckyItems[hash % luckyItems.length],
+    flow: flows[hash % flows.length],
+    action: actions[hash % actions.length]
   };
 }

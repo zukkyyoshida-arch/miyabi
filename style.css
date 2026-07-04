@@ -60,6 +60,13 @@ body.theme-naming {
   --glow-color-3: rgba(134, 68, 255, 0.15);
 }
 
+body.theme-daily {
+  --accent-gold: #ffb900;
+  --glow-color-1: rgba(255, 185, 0, 0.25);
+  --glow-color-2: rgba(255, 69, 0, 0.15);
+  --glow-color-3: rgba(134, 68, 255, 0.1);
+}
+
 /* 全体のリセット */
 * {
   box-sizing: border-box;
@@ -550,11 +557,37 @@ body {
   letter-spacing: 1px;
 }
 
+/* スコアとチャートの横並びコンテナ */
+.score-chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-box {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 500px) {
+  .score-chart-container {
+    flex-direction: column;
+  }
+}
+
 /* 五格解析のスタイリング */
 .fate-scores {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  flex-grow: 1;
 }
 
 .score-item {
@@ -614,6 +647,54 @@ body {
 .badge-shokichi { background: linear-gradient(135deg, #87cefa, #4682b4); color: #fff; }
 .badge-chutotsu { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-main); }
 .badge-kyou { background: linear-gradient(135deg, #ff4500, #8b0000); color: #fff; }
+
+/* ラッキーカラー＆ラッキーアイテム */
+.lucky-elements-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.lucky-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+}
+
+.color-item {
+  position: relative;
+}
+
+.lucky-label {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lucky-label i {
+  width: 16px;
+  height: 16px;
+}
+
+.lucky-value {
+  font-weight: 600;
+}
+
+.color-preview {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  vertical-align: middle;
+  background-color: transparent;
+  transition: var(--transition-smooth);
+}
 
 /* AI総合鑑定のスタイリング（タブシステム） */
 .icon-gold {
@@ -948,6 +1029,29 @@ body {
   color: var(--text-muted);
 }
 
+/* 今日の運勢結果表示のスタイル */
+.daily-score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.daily-rating {
+  font-size: 2.5rem;
+  color: var(--accent-gold);
+  letter-spacing: 4px;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px var(--accent-gold-glow);
+}
+
+.daily-score-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
 /* アクションボタン領域 */
 .result-actions {
   display: flex;
@@ -1063,6 +1167,10 @@ body {
 .type-naming {
   background: rgba(229, 193, 88, 0.15);
   color: #dfba5c;
+}
+.type-daily {
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
 }
 
 .history-item-name {
