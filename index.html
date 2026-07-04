@@ -18,10 +18,10 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <!-- 背景のグラデーション・装飾 -->
-  <div class="bg-blur bg-blur-1"></div>
-  <div class="bg-blur bg-blur-2"></div>
-  <div class="bg-blur bg-blur-3"></div>
+  <!-- 背景のグラデーション・装飾（JSでテーマクラスを付与） -->
+  <div id="bg-glow-1" class="bg-blur bg-blur-1"></div>
+  <div id="bg-glow-2" class="bg-blur bg-blur-2"></div>
+  <div id="bg-glow-3" class="bg-blur bg-blur-3"></div>
 
   <div class="app-container">
     <!-- ヘッダー -->
@@ -40,31 +40,98 @@
       <!-- 導入セクション -->
       <section class="intro-section">
         <h1>名前に宿る運命を、AIが紐解く。</h1>
-        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、あなたの名前が持つ響きと画数から、性格、適職、そして未来へのアドバイスを導き出します。</p>
+        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、運勢や性格、そして二人の相性を導き出します。</p>
       </section>
+
+      <!-- 鑑定モード切り替えタブ -->
+      <div class="mode-tabs">
+        <button id="tab-mode-single" class="mode-tab-button active">
+          <i data-lucide="user"></i>
+          <span>個人鑑定</span>
+        </button>
+        <button id="tab-mode-compat" class="mode-tab-button">
+          <i data-lucide="heart"></i>
+          <span>相性鑑定</span>
+        </button>
+      </div>
 
       <!-- 入力フォームカード -->
       <section class="form-card card glass">
         <form id="fortune-form" autocomplete="off">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="input-last-name">姓（名字）</label>
-              <input type="text" id="input-last-name" placeholder="例：極楽" required>
-            </div>
-            <div class="form-group">
-              <label for="input-first-name">名（名前）</label>
-              <input type="text" id="input-first-name" placeholder="例：太郎" required>
-            </div>
-            <div class="form-group">
-              <label for="input-last-name-kana">せい（ひらがな）</label>
-              <input type="text" id="input-last-name-kana" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください" required>
-            </div>
-            <div class="form-group">
-              <label for="input-first-name-kana">めい（ひらがな）</label>
-              <input type="text" id="input-first-name-kana" placeholder="例：たろう" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください" required>
+          
+          <!-- 個人鑑定用入力エリア -->
+          <div id="form-single-fields">
+            <h3 class="form-section-title"><i data-lucide="user" class="title-icon"></i> 鑑定者のお名前</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="input-last-name">姓（名字）</label>
+                <input type="text" id="input-last-name" placeholder="例：極楽" required>
+              </div>
+              <div class="form-group">
+                <label for="input-first-name">名（名前）</label>
+                <input type="text" id="input-first-name" placeholder="例：太郎" required>
+              </div>
+              <div class="form-group">
+                <label for="input-last-name-kana">せい（ひらがな）</label>
+                <input type="text" id="input-last-name-kana" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください" required>
+              </div>
+              <div class="form-group">
+                <label for="input-first-name-kana">めい（ひらがな）</label>
+                <input type="text" id="input-first-name-kana" placeholder="例：たろう" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください" required>
+              </div>
             </div>
           </div>
 
+          <!-- 相性鑑定用入力エリア (初期非表示) -->
+          <div id="form-compat-fields" class="hidden">
+            <!-- 1人目 -->
+            <div class="compat-person-section">
+              <h3 class="form-section-title"><i data-lucide="user" class="title-icon icon-cyan"></i> 一人目（あなた）</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="compat-last-name-1">姓（名字）</label>
+                  <input type="text" id="compat-last-name-1" placeholder="例：極楽">
+                </div>
+                <div class="form-group">
+                  <label for="compat-first-name-1">名（名前）</label>
+                  <input type="text" id="compat-first-name-1" placeholder="例：太郎">
+                </div>
+                <div class="form-group">
+                  <label for="compat-last-name-kana-1">せい（ひらがな）</label>
+                  <input type="text" id="compat-last-name-kana-1" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+                </div>
+                <div class="form-group">
+                  <label for="compat-first-name-kana-1">めい（ひらがな）</label>
+                  <input type="text" id="compat-first-name-kana-1" placeholder="例：たろう" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+                </div>
+              </div>
+            </div>
+            
+            <!-- 2人目 -->
+            <div class="compat-person-section">
+              <h3 class="form-section-title"><i data-lucide="user" class="title-icon icon-pink"></i> 二人目（お相手）</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="compat-last-name-2">姓（名字）</label>
+                  <input type="text" id="compat-last-name-2" placeholder="例：極楽">
+                </div>
+                <div class="form-group">
+                  <label for="compat-first-name-2">名（名前）</label>
+                  <input type="text" id="compat-first-name-2" placeholder="例：花子">
+                </div>
+                <div class="form-group">
+                  <label for="compat-last-name-kana-2">せい（ひらがな）</label>
+                  <input type="text" id="compat-last-name-kana-2" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+                </div>
+                <div class="form-group">
+                  <label for="compat-first-name-kana-2">めい（ひらがな）</label>
+                  <input type="text" id="compat-first-name-kana-2" placeholder="例：はなこ" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 共通オプション -->
           <div class="additional-options">
             <button type="button" id="btn-toggle-options" class="text-button">
               <span class="button-text">追加情報（任意）</span>
@@ -72,7 +139,7 @@
             </button>
             
             <div id="optional-fields" class="optional-fields hidden">
-              <div class="form-grid">
+              <div class="form-grid" id="single-optional-grid">
                 <div class="form-group">
                   <label for="input-birthday">生年月日</label>
                   <input type="date" id="input-birthday">
@@ -87,11 +154,21 @@
                   </select>
                 </div>
               </div>
+              <div class="form-grid hidden" id="compat-optional-grid">
+                <div class="form-group">
+                  <label for="compat-relation">関係性</label>
+                  <select id="compat-relation">
+                    <option value="general">一般（友人・知人）</option>
+                    <option value="romance">恋愛・結婚</option>
+                    <option value="business">仕事・ビジネス</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
           <button type="submit" id="btn-submit" class="submit-button">
-            <span class="btn-text">鑑定する</span>
+            <span class="btn-text">天命を鑑定する</span>
             <i data-lucide="sparkles"></i>
           </button>
         </form>
@@ -115,7 +192,8 @@
           <p id="result-kana">ごくらく たろう</p>
         </div>
 
-        <div class="result-grid">
+        <!-- 個人鑑定結果表示 -->
+        <div class="result-grid" id="result-single-grid">
           <!-- 画数・五格情報 -->
           <div class="card glass result-card fate-scores-card">
             <h3>五格・五行解析</h3>
@@ -167,11 +245,78 @@
           </div>
         </div>
 
+        <!-- 相性鑑定結果表示 (初期非表示) -->
+        <div class="result-grid hidden" id="result-compat-grid">
+          <!-- 二人の総格比較カード -->
+          <div class="card glass result-card compat-summary-card">
+            <h3>数霊の響きあう関係</h3>
+            <div class="compat-scores">
+              <div class="compat-score-row">
+                <span class="compat-name" id="compat-name-1">一人目</span>
+                <span class="compat-score-val" id="compat-so-1">--</span>
+              </div>
+              <div class="compat-score-vs"><i data-lucide="heart" class="icon-pulse"></i></div>
+              <div class="compat-score-row">
+                <span class="compat-name" id="compat-name-2">二人目</span>
+                <span class="compat-score-val" id="compat-so-2">--</span>
+              </div>
+            </div>
+            
+            <div class="compat-matching-rate">
+              <div class="matching-title">共鳴度</div>
+              <div class="matching-percentage" id="compat-rate">--%</div>
+              <div class="matching-bar-container">
+                <div class="matching-bar" id="compat-rate-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI相性鑑定テキスト -->
+          <div class="card glass result-card ai-reading-card">
+            <h3><i data-lucide="heart" class="icon-pink"></i> AI 相性鑑定</h3>
+            
+            <div class="ai-tab-container">
+              <div class="ai-tabs">
+                <button class="tab-button active" data-tab="tab-compat-essence">縁（えにし）と基本相性</button>
+                <button class="tab-button" data-tab="tab-compat-synergy">発展とシナジー</button>
+                <button class="tab-button" data-tab="tab-compat-advice">調和へのアドバイス</button>
+              </div>
+              
+              <div class="tab-content active" id="tab-compat-essence">
+                <div class="typing-text" id="ai-compat-essence-text"></div>
+              </div>
+              <div class="tab-content" id="tab-compat-synergy">
+                <div class="typing-text" id="ai-compat-synergy-text"></div>
+              </div>
+              <div class="tab-content" id="tab-compat-advice">
+                <div class="typing-text" id="ai-compat-advice-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="result-actions">
+          <button id="btn-save-history" class="secondary-button accent-gold-border">
+            <i data-lucide="bookmark"></i>
+            <span>鑑定帳に保存</span>
+          </button>
+          <button id="btn-share-result" class="secondary-button">
+            <i data-lucide="share-2"></i>
+            <span>結果をコピー</span>
+          </button>
           <button id="btn-reset" class="secondary-button">
             <i data-lucide="rotate-ccw"></i>
             <span>もう一度占う</span>
           </button>
+        </div>
+      </section>
+
+      <!-- 過去の「鑑定帳」セクション -->
+      <section id="history-section" class="history-section card glass">
+        <h3><i data-lucide="book-open" class="title-icon"></i> 鑑定帳（過去の履歴）</h3>
+        <p class="history-empty" id="history-empty-text">まだ保存された鑑定履歴はありません。</p>
+        <div class="history-list hidden" id="history-list">
+          <!-- 履歴アイテムがJSで動的追加される -->
         </div>
       </section>
     </main>
@@ -208,6 +353,15 @@
             <input type="checkbox" id="checkbox-use-mock">
             <span class="checkbox-custom"></span>
             <span>モックモード（APIキーを使わずデモ表示）</span>
+          </label>
+        </div>
+
+        <!-- 音響効果のON/OFF -->
+        <div class="form-group row">
+          <label for="checkbox-enable-sound" class="checkbox-label">
+            <input type="checkbox" id="checkbox-enable-sound" checked>
+            <span class="checkbox-custom"></span>
+            <span>鑑定時に「おりん」の音響効果を再生する</span>
           </label>
         </div>
 

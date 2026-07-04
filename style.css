@@ -8,6 +8,7 @@
   --accent-gold-glow: rgba(223, 186, 92, 0.25);
   --accent-purple: #8644ff;
   --accent-sakura: #ffb5c5;
+  --accent-cyan: #00f0ff;
   
   --text-main: #f3f3f6;
   --text-muted: #9c9ab0;
@@ -16,6 +17,40 @@
   --font-sans: 'Outfit', 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
   
   --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* 動的テーマ用デフォルト値 */
+  --glow-color-1: var(--accent-purple);
+  --glow-color-2: rgba(223, 186, 92, 0.15);
+  --glow-color-3: var(--accent-sakura);
+}
+
+/* テーマ別のオーラ色定義 */
+body.theme-daikichi {
+  --accent-gold: #ffd700;
+  --glow-color-1: rgba(255, 215, 0, 0.3);
+  --glow-color-2: rgba(255, 140, 0, 0.2);
+  --glow-color-3: rgba(255, 215, 0, 0.15);
+}
+
+body.theme-kichi {
+  --accent-gold: #3ae69f;
+  --glow-color-1: rgba(0, 250, 154, 0.25);
+  --glow-color-2: rgba(0, 128, 128, 0.2);
+  --glow-color-3: rgba(135, 206, 250, 0.15);
+}
+
+body.theme-kyou {
+  --accent-gold: #ff4500;
+  --glow-color-1: rgba(139, 0, 0, 0.35);
+  --glow-color-2: rgba(75, 0, 130, 0.25);
+  --glow-color-3: rgba(255, 69, 0, 0.15);
+}
+
+body.theme-compat {
+  --accent-gold: #ff69b4;
+  --glow-color-1: rgba(255, 105, 180, 0.3);
+  --glow-color-2: rgba(0, 240, 255, 0.2);
+  --glow-color-3: rgba(255, 182, 193, 0.15);
 }
 
 /* 全体のリセット */
@@ -33,6 +68,7 @@ body {
   position: relative;
   overflow-x: hidden;
   line-height: 1.6;
+  transition: background-color 0.8s ease;
 }
 
 /* 背景グラデーション・ブラー効果 */
@@ -43,12 +79,13 @@ body {
   z-index: -1;
   pointer-events: none;
   opacity: 0.4;
+  transition: background 0.8s ease;
 }
 
 .bg-blur-1 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--glow-color-1) 0%, transparent 70%);
   top: -100px;
   right: -50px;
 }
@@ -56,7 +93,7 @@ body {
 .bg-blur-2 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(223, 186, 92, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--glow-color-2) 0%, transparent 70%);
   bottom: -150px;
   left: -100px;
 }
@@ -64,7 +101,7 @@ body {
 .bg-blur-3 {
   width: 350px;
   height: 350px;
-  background: radial-gradient(circle, var(--accent-sakura) 0%, transparent 75%);
+  background: radial-gradient(circle, var(--glow-color-3) 0%, transparent 75%);
   top: 40%;
   left: 30%;
   opacity: 0.15;
@@ -86,7 +123,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .logo {
@@ -108,6 +145,7 @@ body {
   justify-content: center;
   border-radius: 8px;
   box-shadow: 0 0 15px var(--accent-gold-glow);
+  transition: var(--transition-smooth);
 }
 
 .logo-text {
@@ -154,7 +192,7 @@ body {
 /* 導入セクション */
 .intro-section {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .intro-section h1 {
@@ -165,7 +203,8 @@ body {
   background: linear-gradient(to right, #fff, var(--accent-sakura), var(--accent-gold));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
+  transition: var(--transition-smooth);
 }
 
 .intro-section p {
@@ -173,6 +212,47 @@ body {
   font-size: 1rem;
   max-width: 600px;
   margin: 0 auto;
+}
+
+/* 鑑定モード切り替えタブ */
+.mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mode-tab-button {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  padding: 0.8rem 1.8rem;
+  border-radius: 30px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: var(--transition-smooth);
+}
+
+.mode-tab-button i {
+  width: 16px;
+  height: 16px;
+}
+
+.mode-tab-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mode-tab-button.active {
+  background: rgba(229, 193, 88, 0.1);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 15px rgba(229, 193, 88, 0.1);
 }
 
 /* Glassmorphism カードの基本定義 */
@@ -183,12 +263,12 @@ body {
   border: 1px solid var(--card-border);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   border-radius: 16px;
+  transition: var(--transition-smooth);
 }
 
 .card {
   padding: 2.5rem;
   margin-bottom: 2rem;
-  transition: var(--transition-smooth);
 }
 
 .form-card:hover {
@@ -196,7 +276,37 @@ body {
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
 }
 
-/* フォームのスタイリング */
+/* フォームのタイトル */
+.form-section-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--text-main);
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+
+.title-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-gold);
+}
+
+.icon-cyan { color: var(--accent-cyan) !important; }
+.icon-pink { color: #ff69b4 !important; }
+
+.compat-person-section {
+  margin-bottom: 2rem;
+}
+
+.compat-person-section:last-child {
+  margin-bottom: 0;
+}
+
+/* フォームのグリッドスタイリング */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -215,6 +325,7 @@ body {
   font-weight: 600;
   color: var(--accent-gold);
   letter-spacing: 1px;
+  transition: var(--transition-smooth);
 }
 
 .form-group input,
@@ -398,6 +509,7 @@ body {
   color: var(--accent-gold);
   margin-bottom: 0.3rem;
   letter-spacing: 2px;
+  transition: var(--transition-smooth);
 }
 
 .result-header p {
@@ -475,6 +587,7 @@ body {
 .font-large {
   font-size: 1.6rem;
   color: var(--accent-gold);
+  transition: var(--transition-smooth);
 }
 
 /* 運勢バッジ */
@@ -500,6 +613,7 @@ body {
   display: inline-block;
   vertical-align: middle;
   margin-right: 0.3rem;
+  transition: var(--transition-smooth);
 }
 
 .ai-tab-container {
@@ -544,6 +658,7 @@ body {
   height: 2px;
   background: var(--accent-gold);
   box-shadow: 0 0 8px var(--accent-gold);
+  transition: var(--transition-smooth);
 }
 
 .tab-content {
@@ -563,9 +678,91 @@ body {
   white-space: pre-wrap;
 }
 
+/* 相性診断結果表示用のスタイル */
+.compat-scores {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.compat-score-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.compat-name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.compat-score-val {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--accent-gold);
+  transition: var(--transition-smooth);
+}
+
+.compat-score-vs i {
+  color: #ff69b4;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.compat-matching-rate {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.matching-title {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.matching-percentage {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ff69b4;
+  margin: 0.5rem 0;
+  font-family: var(--font-sans);
+}
+
+.matching-bar-container {
+  background: rgba(255, 255, 255, 0.05);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 80%;
+  margin: 0 auto;
+}
+
+.matching-bar {
+  background: linear-gradient(to right, #ff69b4, var(--accent-gold));
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* アクションボタン領域 */
 .result-actions {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-top: 2.5rem;
 }
 
@@ -573,9 +770,9 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-main);
-  padding: 0.8rem 2rem;
+  padding: 0.8rem 1.8rem;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -587,6 +784,118 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--accent-sakura);
   color: var(--accent-sakura);
+}
+
+.accent-gold-border {
+  border-color: rgba(229, 193, 88, 0.3);
+}
+.accent-gold-border:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+/* 鑑定履歴（鑑定帳）セクション */
+.history-section {
+  margin-top: 3rem;
+  padding: 2rem;
+}
+
+.history-section h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--accent-gold);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition-smooth);
+}
+
+.history-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.history-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .history-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.history-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(229, 193, 88, 0.25);
+  transform: translateY(-1px);
+}
+
+.history-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.history-item-type {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  width: fit-content;
+  font-weight: bold;
+}
+.type-single {
+  background: rgba(134, 68, 255, 0.15);
+  color: var(--accent-sakura);
+}
+.type-compat {
+  background: rgba(255, 105, 180, 0.15);
+  color: #ff69b4;
+}
+
+.history-item-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.history-item-score {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.btn-delete-history {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.btn-delete-history:hover {
+  background: rgba(255, 69, 0, 0.15);
+  color: #ff4500;
 }
 
 /* 設定モーダルのスタイリング */
