@@ -9,6 +9,22 @@ function resetTheme() {
   document.body.className = '';
 }
 
+// タイピング風テキスト演出
+function typeWriter(text, element, speed = 20) {
+  let i = 0;
+  element.textContent = '';
+  
+  function type() {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    }
+  }
+  type();
+}
+
+
 // アプリのグローバル状態
 let currentResult = null; // 現在表示中の鑑定結果を一時保存するオブジェクト
 let currentMode = 'single'; // 'single', 'compat', 'naming', 'daily'
