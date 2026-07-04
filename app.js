@@ -11,12 +11,13 @@ function resetTheme() {
 
 // タイピング風テキスト演出
 function typeWriter(text, element, speed = 20) {
+  const txt = text || '';
   let i = 0;
   element.textContent = '';
   
   function type() {
-    if (i < text.length) {
-      element.textContent += text.charAt(i);
+    if (i < txt.length) {
+      element.textContent += txt.charAt(i);
       i++;
       setTimeout(type, speed);
     }
@@ -908,12 +909,13 @@ function drawRadarChart(fortunes) {
 
   // 吉凶を1〜5の数値に変換
   const getFortuneValue = (fortune) => {
-    if (fortune.includes('大吉')) return 5;
-    if (fortune.includes('大凶')) return 1;
-    if (fortune.includes('吉')) return 4;
-    if (fortune.includes('小吉') || fortune.includes('半吉')) return 3.5;
-    if (fortune.includes('中吉') || fortune.includes('吉凶半々')) return 3;
-    if (fortune.includes('凶')) return 1.8;
+    const f = fortune || '';
+    if (f.includes('大吉')) return 5;
+    if (f.includes('大凶')) return 1;
+    if (f.includes('吉')) return 4;
+    if (f.includes('小吉') || f.includes('半吉')) return 3.5;
+    if (f.includes('中吉') || f.includes('吉凶半々')) return 3;
+    if (f.includes('凶')) return 1.8;
     return 2.5; // その他
   };
 
@@ -1035,7 +1037,17 @@ function generateAmuletImage(result) {
   ctx.strokeStyle = 'rgba(223, 186, 92, 0.4)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(60, 60, canvas.width - 120, canvas.height - 120, 8);
+  if (ctx.roundRect) {
+    ctx.roundRect(60, 60, canvas.width - 120, canvas.height - 120, 8);
+  } else {
+    // 古いブラウザ（iOS 15以前のSafariなど）用のフォールバック描画
+    const x = 60, y = 60, w = canvas.width - 120, h = canvas.height - 120, r = 8;
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+  }
   ctx.fill();
   ctx.stroke();
 
