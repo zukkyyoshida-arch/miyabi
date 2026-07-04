@@ -1,0 +1,782 @@
+:root {
+  --bg-color: #0d0c12;
+  --card-bg: rgba(25, 23, 36, 0.6);
+  --card-border: rgba(229, 193, 88, 0.15);
+  --card-border-focus: rgba(229, 193, 88, 0.5);
+  
+  --accent-gold: #dfba5c;
+  --accent-gold-glow: rgba(223, 186, 92, 0.25);
+  --accent-purple: #8644ff;
+  --accent-sakura: #ffb5c5;
+  
+  --text-main: #f3f3f6;
+  --text-muted: #9c9ab0;
+  
+  --font-serif: 'Noto Serif JP', serif;
+  --font-sans: 'Outfit', 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+  
+  --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 全体のリセット */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* 背景グラデーション・ブラー効果 */
+.bg-blur {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.bg-blur-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+  top: -100px;
+  right: -50px;
+}
+
+.bg-blur-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(223, 186, 92, 0.15) 0%, transparent 70%);
+  bottom: -150px;
+  left: -100px;
+}
+
+.bg-blur-3 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, var(--accent-sakura) 0%, transparent 75%);
+  top: 40%;
+  left: 30%;
+  opacity: 0.15;
+}
+
+/* アプリコンテナ */
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ヘッダー */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.logo-kanji {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--accent-gold);
+  border: 1.5px solid var(--accent-gold);
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-shadow: 0 0 15px var(--accent-gold-glow);
+}
+
+.logo-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.7rem;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-sakura));
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+/* アイコンボタン */
+.icon-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-gold);
+  transform: rotate(30deg);
+  box-shadow: 0 0 10px var(--accent-gold-glow);
+}
+
+/* 導入セクション */
+.intro-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.intro-section h1 {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  background: linear-gradient(to right, #fff, var(--accent-sakura), var(--accent-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.intro-section p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Glassmorphism カードの基本定義 */
+.glass {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-radius: 16px;
+}
+
+.card {
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  transition: var(--transition-smooth);
+}
+
+.form-card:hover {
+  border-color: rgba(229, 193, 88, 0.25);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* フォームのスタイリング */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  letter-spacing: 1px;
+}
+
+.form-group input,
+.form-group select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: var(--transition-smooth);
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold-glow);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* 追加オプション（任意）のトグル */
+.additional-options {
+  margin: 1.5rem 0;
+}
+
+.text-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition-smooth);
+}
+
+.text-button:hover {
+  color: var(--accent-sakura);
+}
+
+.text-button i {
+  width: 16px;
+  height: 16px;
+  transition: var(--transition-smooth);
+}
+
+.text-button i.rotate {
+  transform: rotate(180deg);
+}
+
+.optional-fields {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.optional-fields.hidden {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  margin-top: 0;
+  padding-top: 0;
+  border: none;
+}
+
+/* 送信ボタン */
+.submit-button {
+  background: linear-gradient(135deg, var(--accent-gold), #b38f32);
+  color: #0d0c12;
+  border: none;
+  width: 100%;
+  padding: 1.2rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  transition: var(--transition-smooth);
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 15px rgba(223, 186, 92, 0.2);
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(223, 186, 92, 0.4);
+  background: linear-gradient(135deg, #ffd770, #cda236);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+/* ローディングセクション (陰陽ロードアニメーション) */
+.loading-section {
+  text-align: center;
+  padding: 3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.yin-yang-loader {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid rgba(223, 186, 92, 0.3);
+  position: relative;
+  background: linear-gradient(to right, #fff 50%, #000 50%);
+  animation: spin 2s linear infinite;
+  box-shadow: 0 0 20px rgba(223, 186, 92, 0.1);
+}
+
+.yin-yang-loader::before,
+.yin-yang-loader::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.yin-yang-loader::before {
+  top: 0;
+  background: #fff;
+  background-image: radial-gradient(circle, #000 25%, transparent 25%);
+}
+
+.yin-yang-loader::after {
+  bottom: 0;
+  background: #000;
+  background-image: radial-gradient(circle, #fff 25%, transparent 25%);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loading-text {
+  font-family: var(--font-serif);
+  color: var(--accent-sakura);
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+}
+
+/* 結果表示セクション */
+.result-section {
+  margin-top: 1rem;
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.result-header h2 {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  color: var(--accent-gold);
+  margin-bottom: 0.3rem;
+  letter-spacing: 2px;
+}
+
+.result-header p {
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  letter-spacing: 4px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.result-card h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.8rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+
+/* 五格解析のスタイリング */
+.fate-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.score-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  padding-top: 0.5rem;
+}
+
+.score-title {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.score-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.score-val {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.font-large {
+  font-size: 1.6rem;
+  color: var(--accent-gold);
+}
+
+/* 運勢バッジ */
+.fortune-badge {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-shadow: none;
+  letter-spacing: 0;
+}
+
+.badge-daikichi { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #0d0c12; }
+.badge-kichi { background: linear-gradient(135deg, #00fa9a, #008080); color: #fff; }
+.badge-shokichi { background: linear-gradient(135deg, #87cefa, #4682b4); color: #fff; }
+.badge-chutotsu { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-main); }
+.badge-kyou { background: linear-gradient(135deg, #ff4500, #8b0000); color: #fff; }
+
+/* AI総合鑑定のスタイリング（タブシステム） */
+.icon-gold {
+  color: var(--accent-gold);
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+}
+
+.ai-tab-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  position: relative;
+  font-weight: 500;
+}
+
+.tab-button:hover {
+  color: var(--text-main);
+}
+
+.tab-button.active {
+  color: var(--accent-gold);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.6rem;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+}
+
+.tab-content {
+  display: none;
+  min-height: 180px;
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* タイピングテキスト効果用 */
+.typing-text {
+  white-space: pre-wrap;
+}
+
+.result-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: var(--transition-smooth);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-sakura);
+  color: var(--accent-sakura);
+}
+
+/* 設定モーダルのスタイリング */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 1;
+  transition: var(--transition-smooth);
+}
+
+.modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 500px;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.hidden .modal-content {
+  transform: translateY(20px);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.modal-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-footer .submit-button {
+  margin-top: 0;
+  width: auto;
+  padding: 0.7rem 2rem;
+}
+
+/* チェックボックスのスタイリング */
+.form-group.row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  user-select: none;
+}
+
+.checkbox-label input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  transition: var(--transition-smooth);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.checkbox-label input:checked + .checkbox-custom {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.checkbox-label input:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #0d0c12;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ステータスインジケーター */
+.status-indicator {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.status-indicator.info {
+  background: rgba(134, 68, 255, 0.1);
+  border: 1px solid rgba(134, 68, 255, 0.2);
+  color: var(--accent-sakura);
+}
+
+.status-indicator.success {
+  background: rgba(0, 250, 154, 0.08);
+  border: 1px solid rgba(0, 250, 154, 0.2);
+  color: #00fa9a;
+}
+
+/* フッター */
+.app-footer {
+  text-align: center;
+  margin-top: 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1.5rem;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ユーティリティ */
+.hidden {
+  display: none !important;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .intro-section h1 {
+    font-size: 1.7rem;
+  }
+  .card {
+    padding: 1.5rem;
+  }
+}

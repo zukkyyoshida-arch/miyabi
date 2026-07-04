@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雅 (Miyabi) - AI姓名判断ウェブアプリ</title>
+  <meta name="description" content="AIが伝統的な姓名判断と現代のインサイトを融合させ、あなたの名前に秘められた運勢を紐解く美しいウェブアプリケーション。">
+  
+  <!-- Google Fonts: Noto Serif JP & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- 背景のグラデーション・装飾 -->
+  <div class="bg-blur bg-blur-1"></div>
+  <div class="bg-blur bg-blur-2"></div>
+  <div class="bg-blur bg-blur-3"></div>
+
+  <div class="app-container">
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-kanji">雅</span>
+        <span class="logo-text">MIYABI <span class="badge">AI</span></span>
+      </div>
+      <button id="btn-settings" class="icon-button" title="設定" aria-label="設定">
+        <i data-lucide="settings"></i>
+      </button>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="app-main">
+      <!-- 導入セクション -->
+      <section class="intro-section">
+        <h1>名前に宿る運命を、AIが紐解く。</h1>
+        <p>伝統的な姓名判断の知見と先進のAI技術を融合し、あなたの名前が持つ響きと画数から、性格、適職、そして未来へのアドバイスを導き出します。</p>
+      </section>
+
+      <!-- 入力フォームカード -->
+      <section class="form-card card glass">
+        <form id="fortune-form" autocomplete="off">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-last-name">姓（名字）</label>
+              <input type="text" id="input-last-name" placeholder="例：極楽" required>
+            </div>
+            <div class="form-group">
+              <label for="input-first-name">名（名前）</label>
+              <input type="text" id="input-first-name" placeholder="例：太郎" required>
+            </div>
+            <div class="form-group">
+              <label for="input-last-name-kana">せい（ひらがな）</label>
+              <input type="text" id="input-last-name-kana" placeholder="例：ごくらく" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください" required>
+            </div>
+            <div class="form-group">
+              <label for="input-first-name-kana">めい（ひらがな）</label>
+              <input type="text" id="input-first-name-kana" placeholder="例：たろう" pattern="^[ぁ-んー]*$" title="ひらがなで入力してください" required>
+            </div>
+          </div>
+
+          <div class="additional-options">
+            <button type="button" id="btn-toggle-options" class="text-button">
+              <span class="button-text">追加情報（任意）</span>
+              <i data-lucide="chevron-down" id="options-chevron"></i>
+            </button>
+            
+            <div id="optional-fields" class="optional-fields hidden">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="input-birthday">生年月日</label>
+                  <input type="date" id="input-birthday">
+                </div>
+                <div class="form-group">
+                  <label for="input-gender">性別</label>
+                  <select id="input-gender">
+                    <option value="">指定しない</option>
+                    <option value="male">男性</option>
+                    <option value="female">女性</option>
+                    <option value="other">その他</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit" class="submit-button">
+            <span class="btn-text">鑑定する</span>
+            <i data-lucide="sparkles"></i>
+          </button>
+        </form>
+      </section>
+
+      <!-- ローディングセクション -->
+      <section id="loading-section" class="loading-section hidden">
+        <div class="loader-container">
+          <div class="yin-yang-loader">
+            <div class="yin"></div>
+            <div class="yang"></div>
+          </div>
+          <p id="loading-text">天格・地格・人格を解析中...</p>
+        </div>
+      </section>
+
+      <!-- 結果表示セクション -->
+      <section id="result-section" class="result-section hidden">
+        <div class="result-header">
+          <h2 id="result-name">極楽 太郎 殿</h2>
+          <p id="result-kana">ごくらく たろう</p>
+        </div>
+
+        <div class="result-grid">
+          <!-- 画数・五格情報 -->
+          <div class="card glass result-card fate-scores-card">
+            <h3>五格・五行解析</h3>
+            <div class="fate-scores">
+              <div class="score-item">
+                <div class="score-title">天格 <span class="score-desc">（祖先運）</span></div>
+                <div class="score-val" id="score-ten">-- <span class="fortune-badge">--</span></div>
+              </div>
+              <div class="score-item">
+                <div class="score-title">人格 <span class="score-desc">（主運・性格）</span></div>
+                <div class="score-val" id="score-jin">-- <span class="fortune-badge">--</span></div>
+              </div>
+              <div class="score-item">
+                <div class="score-title">地格 <span class="score-desc">（初運・若年期）</span></div>
+                <div class="score-val" id="score-chi">-- <span class="fortune-badge">--</span></div>
+              </div>
+              <div class="score-item">
+                <div class="score-title">外格 <span class="score-desc">（助運・対人関係）</span></div>
+                <div class="score-val" id="score-gai">-- <span class="fortune-badge">--</span></div>
+              </div>
+              <div class="score-item">
+                <div class="score-title">総格 <span class="score-desc">（総運・晩年期）</span></div>
+                <div class="score-val font-large" id="score-so">-- <span class="fortune-badge score-so-badge">--</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI鑑定テキスト -->
+          <div class="card glass result-card ai-reading-card">
+            <h3><i data-lucide="sparkles" class="icon-gold"></i> AI 総合鑑定</h3>
+            
+            <div class="ai-tab-container">
+              <div class="ai-tabs">
+                <button class="tab-button active" data-tab="tab-essence">本質・性格</button>
+                <button class="tab-button" data-tab="tab-destiny">人生・仕事運</button>
+                <button class="tab-button" data-tab="tab-advice">吉凶と助言</button>
+              </div>
+              
+              <div class="tab-content active" id="tab-essence">
+                <div class="typing-text" id="ai-essence-text"></div>
+              </div>
+              <div class="tab-content" id="tab-destiny">
+                <div class="typing-text" id="ai-destiny-text"></div>
+              </div>
+              <div class="tab-content" id="tab-advice">
+                <div class="typing-text" id="ai-advice-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button id="btn-reset" class="secondary-button">
+            <i data-lucide="rotate-ccw"></i>
+            <span>もう一度占う</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="app-footer">
+      <p>&copy; 2026 雅 (Miyabi) AI. Created for ずっきーさん.</p>
+    </footer>
+  </div>
+
+  <!-- 設定モーダル (APIキー設定) -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h2><i data-lucide="settings"></i> 鑑定設定</h2>
+        <button id="btn-close-settings" class="icon-button" aria-label="閉じる">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">本アプリはAI（Gemini）を使用して高度な姓名判断を行います。</p>
+        
+        <div class="form-group">
+          <label for="input-api-key">Gemini API キー</label>
+          <input type="password" id="input-api-key" placeholder="AI-zaSy... (APIキーを入力)">
+          <small class="help-text">
+            ※入力されたキーは暗号化されずブラウザのLocalStorageにのみ保存されます。外部サーバーには送信されません。<br>
+            ※APIキーがない場合は、**モックモード**でデモ鑑定を試すことができます。
+          </small>
+        </div>
+
+        <div class="form-group row">
+          <label for="checkbox-use-mock" class="checkbox-label">
+            <input type="checkbox" id="checkbox-use-mock">
+            <span class="checkbox-custom"></span>
+            <span>モックモード（APIキーを使わずデモ表示）</span>
+          </label>
+        </div>
+
+        <div class="status-indicator info" id="api-status">
+          <i data-lucide="info"></i>
+          <span id="api-status-text">APIキーが設定されていないため、現在はモックモードで動作します。</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="submit-button">保存する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
